@@ -1,5 +1,5 @@
 services:
-  thinkdashboard:
+  nexusdashboard:
     build: .
     ports:
       - "8080:8080"
@@ -8,4 +8,4 @@ services:
     environment:
       - PORT=8080
     restart: unless-stopped
-    container_name: thinkdashboard
+    container_name: nexusdashboard

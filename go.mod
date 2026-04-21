@@ -1,4 +1,4 @@
-module github.com/yourusername/thinkdashboard
+module github.com/yourusername/nexusdashboard
 
 go 1.21
 

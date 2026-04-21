@@ -1,12 +1,12 @@
-# ThinkDashboard Bookmark Saver Extension
+# NexusDashboard Bookmark Saver Extension
 
-A browser extension that allows you to save bookmarks directly to your ThinkDashboard pages.
+A browser extension that allows you to save bookmarks directly to your NexusDashboard pages.
 
 ## Features
 
-- **Save Tab**: Automatically detects the current page title and URL, allows editing the name, and saves to a selected ThinkDashboard page.
-- **Settings**: Configure the ThinkDashboard server URL and set a default page for saving bookmarks.
-- **TUI Style**: Matches the terminal-inspired design of ThinkDashboard.
+- **Save Tab**: Automatically detects the current page title and URL, allows editing the name, and saves to a selected NexusDashboard page.
+- **Settings**: Configure the NexusDashboard server URL and set a default page for saving bookmarks.
+- **TUI Style**: Matches the terminal-inspired design of NexusDashboard.
 
 ## Installation
 
@@ -19,7 +19,7 @@ A browser extension that allows you to save bookmarks directly to your ThinkDash
 
 1. Click the extension icon in your browser toolbar
 2. In the **Settings** tab:
-   - Enter your ThinkDashboard server URL (e.g., `http://localhost:8080`)
+   - Enter your NexusDashboard server URL (e.g., `http://localhost:8080`)
    - Select your default page for saving bookmarks
    - Click "Save Settings"
 3. In the **Save** tab:
@@ -30,7 +30,7 @@ A browser extension that allows you to save bookmarks directly to your ThinkDash
 
 ## API Integration
 
-The extension communicates with ThinkDashboard via the following API endpoints:
+The extension communicates with NexusDashboard via the following API endpoints:
 
 - `GET /api/pages` - Retrieves available pages
 - `POST /api/bookmarks/add` - Adds a new bookmark to a page
@@ -47,5 +47,5 @@ Make sure to reload the extension in `chrome://extensions/` after changes.
 
 ## Requirements
 
-- ThinkDashboard server running and accessible
+- NexusDashboard server running and accessible
 - Chrome browser (or compatible Chromium-based browser)

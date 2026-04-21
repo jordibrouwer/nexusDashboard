@@ -258,7 +258,7 @@ func (h *Handlers) Backup(w http.ResponseWriter, r *http.Request) {
 
 	// Set headers for file download
 	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", "attachment; filename=thinkdashboard-backup.zip")
+	w.Header().Set("Content-Disposition", "attachment; filename=nexusdashboard-backup.zip")
 	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
 
 	// Write the zip content to response
