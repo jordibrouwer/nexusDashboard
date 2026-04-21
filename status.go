@@ -125,7 +125,7 @@ func (h *Handlers) PingURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add User-Agent header to avoid being blocked by some servers
-	req.Header.Set("User-Agent", "ThinkDashboard-Ping/1.0")
+	req.Header.Set("User-Agent", "nexusDashboard -Ping/1.0")
 
 	resp, err := client.Do(req)
 	if resp != nil {

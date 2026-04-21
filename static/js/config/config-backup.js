@@ -106,7 +106,7 @@ class ConfigBackup {
             // Create download
             const now = new Date();
             const timestamp = now.toISOString().replace('T', '_').replace(/\..+/, '').replace(':', '-').replace(':', '-');
-            const filename = `thinkdashboard-backup-${timestamp}.zip`;
+            const filename = `nexusdashboard-backup-${timestamp}.zip`;
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -162,7 +162,7 @@ class ConfigBackup {
         const a = document.createElement('a');
         const pageId = configManager.currentPageId || 1;
         a.href = url;
-        a.download = `thinkdashboard-bookmarks-page-${pageId}.csv`;
+        a.download = `nexusdashboard-bookmarks-page-${pageId}.csv`;
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();

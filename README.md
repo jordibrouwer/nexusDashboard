@@ -1,4 +1,4 @@
-# ThinkDashboard
+# NexusDashboard
 
 A lightweight, self-hosted bookmark dashboard built with Go and vanilla JavaScript.
 
@@ -31,9 +31,9 @@ A lightweight, self-hosted bookmark dashboard built with Go and vanilla JavaScri
 
 ```
 services:
-  thinkdashboard:
-    image: ghcr.io/matiasdesuu/thinkdashboard:latest
-    container_name: thinkdashboard
+  nexusdashboard:
+    image: ghcr.io/jordibrouwer/nexusdashboard:latest
+    container_name: nexusdashboard
     ports:
       - "8080:8080"
     volumes:
@@ -48,7 +48,7 @@ services:
 
 1. Run the container:
 ```bash
-docker run --name thinkdashboard -d -p 8080:8080 -v ./data:/app/data -e PORT=8080 --restart unless-stopped ghcr.io/matiasdesuu/thinkdashboard:latest
+docker run --name nexusdashboard -d -p 8080:8080 -v ./data:/app/data -e PORT=8080 --restart unless-stopped ghcr.io/jordi.brouwer/nexusdashboard:latest
 ```
 
 3. Open your browser and navigate to `http://localhost:8080`
@@ -57,8 +57,8 @@ docker run --name thinkdashboard -d -p 8080:8080 -v ./data:/app/data -e PORT=808
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/MatiasDesuu/ThinkDashboard.git
-cd ThinkDashboard
+git clone https://github.com/jordibrouwer/nexusDashboard.git
+cd nexusDashboard
 ```
 
 2. Install dependencies:
