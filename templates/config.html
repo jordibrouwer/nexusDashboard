@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{.Theme}}" data-font-size="{{.FontSize}}" data-show-background-dots="{{.ShowBackgroundDots}}" data-enable-custom-font="{{.EnableCustomFont}}" data-custom-font-path="{{.CustomFontPath}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Configuration</title>
+    <script src="/static/js/theme-loader.js"></script>
+    <link rel="icon" type="image/x-icon" href="{{if and .EnableCustomFavicon .CustomFaviconPath}}{{.CustomFaviconPath}}{{else}}/static/favicon.ico{{end}}">
+    <link rel="stylesheet" href="/api/theme.css">
+    <link rel="stylesheet" href="/static/css/theme.css">
+    <link rel="stylesheet" href="/static/css/config.css">
+    <link rel="stylesheet" href="/static/css/reorder.css">
+    <link rel="stylesheet" href="/static/css/modal.css">
+    <link rel="stylesheet" href="/static/css/search.css">
+    <link rel="stylesheet" href="/static/css/status.css">
+    <link rel="stylesheet" href="/static/css/select.css">
+    <link rel="stylesheet" href="/static/css/font-size.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="stylesheet" href="/static/css/enhanced-features.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;900&display=swap" rel="stylesheet">
+    <style>
+        /* Prevent flash of unstyled content */
+        body.loading {
+            opacity: 0;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body class="{{.Theme}} font-size-{{.FontSize}} loading" data-theme="{{.Theme}}" data-show-background-dots="{{.ShowBackgroundDots}}">
+    <!-- Contenedor 1: Title y nav links -->
+    <div class="config-section section-header">
+        <div class="container">
+            <header class="header">
+                <h1 class="title" data-i18n="config.title">configuration</h1>
+                <div class="nav-links">
+                    <a href="/colors" class="back-link" data-i18n="config.customizeColors">→ customize colors</a>
+                    <a href="/" class="back-link" data-i18n="config.backToDashboard">← back to dashboard</a>
+                </div>
+            </header>
+        </div>
+    </div>
+
+    <!-- Contenedor 2: Save/Reset buttons y tabs -->
+    <div class="config-section section-controls">
+        <div class="container">
+            <div class="config-controls-wrapper">
+                <div class="config-actions-top">
+                    <button id="save-btn" class="btn btn-success" data-i18n="config.saveChanges">Save Changes</button>
+                    <button id="reset-btn" class="btn btn-danger" data-i18n="config.resetToDefaults">Reset to Defaults</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="general" data-i18n="config.generalTab">general</button>
+                    <button class="tab-button" data-tab="pages" data-i18n="config.pagesTab">pages</button>
+                    <button class="tab-button" data-tab="categories" data-i18n="config.categoriesTab">categories</button>
+                    <button class="tab-button" data-tab="bookmarks" data-i18n="config.bookmarksTab">bookmarks</button>
+                    <button class="tab-button" data-tab="finders" data-i18n="config.findersTab">finders</button>
+                    <button class="tab-button" data-tab="backups" data-i18n="config.backupsTab">backups</button>
+                    <button class="tab-button" data-tab="help" data-i18n="config.aboutTab">help</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor 3: Contenido de la página -->
+    <div class="config-section section-content">
+        <div class="container">
+            <main class="config-main">
+            <div class="tab-content active" data-tab-content="general">
+            <div class="config-section">
+                <div class="general-layout">
+                    <section class="general-card">
+                        <h3 class="section-title">Basics</h3>
+                        <div class="form-group">
+                            <label for="theme-select" data-i18n="config.themeLabel">Theme:</label>
+                            <select id="theme-select">
+                                <option value="dark" data-i18n="dashboard.darkTheme">Dark</option>
+                                <option value="light" data-i18n="dashboard.lightTheme">Light</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="language-select" data-i18n="config.languageLabel">Language:</label>
+                            <select id="language-select">
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="columns-input" data-i18n="config.columnsLabel">Columns per row:</label>
+                            <div class="number-input-wrapper">
+                                <input type="number" id="columns-input" aria-label="Columns per row (1-6)" min="1" max="6" value="3">
+                                <div class="number-input-controls">
+                                    <button type="button" class="number-input-btn number-input-up" data-input="columns-input" aria-label="Increase columns">▲</button>
+                                    <button type="button" class="number-input-btn number-input-down" data-input="columns-input" aria-label="Decrease columns">▼</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sort-method-select">Bookmark sorting:</label>
+                            <select id="sort-method-select">
+                                <option value="order">Manual order</option>
+                                <option value="az">A-Z</option>
+                                <option value="recent">Recently used</option>
+                                <option value="custom">Pinned first</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="layout-preset-select">Layout preset:</label>
+                            <select id="layout-preset-select">
+                                <option value="default">Default</option>
+                                <option value="compact">Compact</option>
+                                <option value="cards">Cards</option>
+                                <option value="terminal">Terminal-ish</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="general-card">
+                        <h3 class="section-title">Typography & Theme Details</h3>
+                        <div class="form-group">
+                            <label data-i18n="config.fontSizeLabel">Font size:</label>
+                            <div class="font-size-selector">
+                                <button type="button" class="font-size-option" data-size="xs">xs</button>
+                                <button type="button" class="font-size-option" data-size="s">s</button>
+                                <button type="button" class="font-size-option" data-size="sm">sm</button>
+                                <button type="button" class="font-size-option active" data-size="m">m</button>
+                                <button type="button" class="font-size-option" data-size="lg">lg</button>
+                                <button type="button" class="font-size-option" data-size="l">l</button>
+                                <button type="button" class="font-size-option" data-size="xl">xl</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label" for="auto-dark-mode-checkbox">
+                                <input type="checkbox" id="auto-dark-mode-checkbox">
+                                <span class="checkbox-text">Auto dark mode (follow system)</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="background-opacity-input">Background opacity</label>
+                            <div class="control-slider">
+                                <input type="range" id="background-opacity-input" class="slider-input" min="0.65" max="1" step="0.01" value="1">
+                                <span id="background-opacity-value" class="slider-value">100%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="font-weight-select">Font weight</label>
+                            <select id="font-weight-select">
+                                <option value="normal">Normal</option>
+                                <option value="600">Semi-bold</option>
+                                <option value="bold">Bold</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="general-card">
+                        <h3 class="section-title" data-i18n="config.dashboardSection">Dashboard</h3>
+                        <div class="checkbox-tree">
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="new-tab-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.openLinksInNewTab">Open links in new tab</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-date-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showDate">Show date</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-title-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showDashboardTitle">Show dashboard title</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-config-button-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showConfigButton">Show config button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-icons-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showIcons">Show bookmark icons</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-page-names-in-tabs-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showPageNamesInTabs">Show page names in tabs</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-page-tabs-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showPageTabs">Show page tabs</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="always-collapse-categories-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.alwaysCollapseCategories">Always collapse categories</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="global-shortcuts-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.globalShortcuts">Use shortcuts from all pages</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="general-card">
+                        <h3 class="section-title">Search & Buttons</h3>
+                        <div class="checkbox-tree">
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-search-button-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showSearchButton">Show search button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-search-button-text-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showButtonText">Show text next to the button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-finders-button-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showFindersButton">Show finders button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-finders-button-text-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showButtonText">Show text next to the button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-commands-button-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showCommandsButton">Show commands button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-commands-button-text-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showButtonText">Show text next to the button</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="keep-search-open-when-empty-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.keepSearchOpenWhenEmpty">Keep search open when empty</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="interleave-mode-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.interleaveMode">Switch Search Mode</span>
+                                    <button type="button" id="interleave-mode-info-btn" class="info-button" aria-label="Information about Search Mode">ℹ</button>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enable-fuzzy-suggestions-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showFuzzySuggestions">Show fuzzy suggestions in search</span>
+                                    <button type="button" id="fuzzy-suggestions-info-btn" class="info-button" aria-label="Information about Fuzzy Suggestions">ℹ</button>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="fuzzy-suggestions-start-with-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.fuzzySuggestionsStartWith">Only show suggestions that start with the query</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="include-finders-in-search-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.includeFindersInSearch">Include finders in search</span>
+                                    <button type="button" id="include-finders-in-search-info-btn" class="info-button" aria-label="Information about Finders in Search">ℹ</button>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="general-card">
+                        <h3 class="section-title">Status</h3>
+                        <div class="checkbox-tree">
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-status-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showBookmarkStatus">Show bookmark status (online/offline)</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-ping-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showPingTimes">Show ping times (ms)</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-status-loading-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showStatusLoading">Show status loading indicator</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="skip-fast-ping-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.skipFastPing">Skip fast ping check</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="general-card">
+                        <h3 class="section-title" data-i18n="config.advancedSection">General</h3>
+                        <div class="checkbox-tree">
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hypr-mode-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.hyprMode">HyprMode (Launcher mode for PWA)</span>
+                                    <button type="button" id="hypr-mode-info-btn" class="info-button" aria-label="Information about HyprMode">ℹ</button>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-background-dots-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showBackgroundDots">Show background dots</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enable-custom-title-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.enableCustomTitle">Enable custom title</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label for="custom-title-input" data-i18n="config.customTitleLabel">Custom title:</label>
+                                <input type="text" id="custom-title-input" maxlength="100" aria-label="Custom dashboard title (max 100 characters)" data-i18n-placeholder="config.customTitlePlaceholder" placeholder="Enter custom title">
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="show-page-in-title-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.showPageInTitle">Show page name in title</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="animations-enabled-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.enableAnimations">Enable animations</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="device-specific-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.deviceSpecificSettings">Use device-specific settings</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="general-card">
+                        <h3 class="section-title">Branding</h3>
+                        <div class="checkbox-tree">
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enable-custom-favicon-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.enableCustomFavicon">Enable custom favicon</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label for="custom-favicon-input" data-i18n="config.uploadFaviconLabel">Upload favicon:</label>
+                                <label for="custom-favicon-input" class="btn btn-secondary file-input-btn" data-i18n="config.chooseFile">Choose File</label>
+                                <input type="file" id="custom-favicon-input" accept="image/x-icon,image/png,image/jpeg,image/gif" style="display: none;">
+                            </div>
+                            <div class="checkbox-tree-item">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enable-custom-font-checkbox">
+                                    <span class="checkbox-text" data-i18n="config.enableCustomFont">Enable custom font</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-tree-item checkbox-tree-child">
+                                <span class="tree-symbol">└──</span>
+                                <label for="custom-font-input" data-i18n="config.uploadFontLabel">Upload font:</label>
+                                <label for="custom-font-input" class="btn btn-secondary file-input-btn" data-i18n="config.chooseFile">Choose File</label>
+                                <input type="file" id="custom-font-input" accept=".woff,.woff2,.ttf,.otf" style="display: none;">
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            </div>
+
+            <div class="tab-content" data-tab-content="pages">
+            <div class="config-section">
+                <div id="pages-list" class="pages-list js-list">
+                    <!-- Pages will be loaded here -->
+                </div>
+                <button id="add-page-btn" class="btn btn-primary" data-i18n="config.addPage">Add Page</button>
+            </div>
+            </div>
+
+            <div class="tab-content" data-tab-content="categories">
+            <div class="config-section">
+                <div class="page-selector-wrapper">
+                    <label for="categories-page-selector" data-i18n="config.categoriesPageLabel">Categories page:</label>
+                    <select id="categories-page-selector" class="page-selector">
+                        <!-- Pages will be loaded here -->
+                    </select>
+                </div>
+                <div id="categories-list" class="categories-list js-list">
+                    <!-- Categories will be loaded here -->
+                </div>
+                <button id="add-category-btn" class="btn btn-primary" data-i18n="config.addCategory">Add Category</button>
+            </div>
+            </div>
+
+            <div class="tab-content" data-tab-content="bookmarks">
+            <div class="config-section">
+                <div class="page-selector-wrapper">
+                    <label for="page-selector" data-i18n="config.bookmarksPageLabel">Bookmarks page:</label>
+                    <select id="page-selector" class="page-selector">
+                        <!-- Pages will be loaded here -->
+                    </select>
+                </div>
+                <div class="bookmarks-toolbar">
+                    <label for="bookmarks-category-filter">Filter category:</label>
+                    <select id="bookmarks-category-filter" class="page-selector">
+                        <option value="__all__">All categories</option>
+                    </select>
+                    <span class="bookmarks-shortcut-hint">Tip: use Alt+Up / Alt+Down to move selected bookmark</span>
+                </div>
+                <div class="bookmarks-toolbar">
+                    <label>Bulk actions:</label>
+                    <button type="button" id="select-all-bookmarks-btn" class="btn btn-secondary btn-small">Select all</button>
+                    <button type="button" id="clear-bookmark-selection-btn" class="btn btn-secondary btn-small">Clear</button>
+                    <button type="button" id="bulk-delete-bookmarks-btn" class="btn btn-danger btn-small">Delete</button>
+                    <select id="bulk-category-select" class="page-selector"></select>
+                    <button type="button" id="bulk-apply-category-btn" class="btn btn-primary btn-small">Move category</button>
+                    <button type="button" id="bulk-toggle-pin-btn" class="btn btn-secondary btn-small">Toggle pin</button>
+                </div>
+                <div id="bookmarks-list" class="bookmarks-list js-list">
+                    <!-- Bookmarks will be loaded here -->
+                </div>
+                <button id="add-bookmark-btn" class="btn btn-primary" data-i18n="config.addBookmark">Add Bookmark</button>
+            </div>
+            </div>
+
+            <div class="tab-content" data-tab-content="finders">
+            <div class="config-section">
+                <div id="finders-list" class="finders-list js-list">
+                    <!-- Finders will be loaded here -->
+                </div>
+                <button id="add-finder-btn" class="btn btn-primary" data-i18n="config.addFinder">Add Finder</button>
+            </div>
+            </div>
+
+            <div class="tab-content" data-tab-content="backups">
+            <div class="config-section">
+                <div class="form-group">
+                    <label data-i18n="config.backupDescription">Export your data</label>
+                    <button type="button" id="backup-info-btn" class="info-button" aria-label="Information about Backup">ℹ</button>
+                    <button id="backup-btn" class="btn btn-primary" data-i18n="config.createBackup">Create Backup</button>
+                </div>
+                <div class="form-group">
+                    <label>CSV bookmarks</label>
+                    <button type="button" id="csv-export-btn" class="btn btn-primary">Export CSV</button>
+                    <input type="file" id="csv-import-file" accept=".csv,text/csv" style="display: none;">
+                    <button type="button" id="csv-import-btn" class="btn btn-danger">Import CSV</button>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="config.importDescription">Import your data</label>
+                    <button type="button" id="import-info-btn" class="info-button" aria-label="Information about Import">ℹ</button>
+                    <input type="file" id="import-file" accept=".zip" style="display: none;">
+                    <button id="import-btn" class="btn btn-danger" data-i18n="config.selectImportFile">Select Import File</button>
+                </div>
+            </div>
+            </div>
+
+            <div class="tab-content" data-tab-content="help">
+            <div class="config-section">
+                <p data-i18n="help.introduction">Welcome to ThinkDashboard! Here are the main features and shortcuts to help you navigate and use the app efficiently.</p>
+                
+                <br>
+                
+                <h3 class="section-title">Navigation</h3>
+                <ul>
+                    <li data-i18n="help.pageNavigation">Page Navigation: Use number keys <code>1</code>, <code>2</code>, <code>3</code>, etc. to switch between pages on the dashboard.</li>
+                    <li data-i18n="help.touchNavigation">Touch Navigation: On mobile or touch devices, swipe left or right to change pages.</li>
+                    <li data-i18n="help.arrowNavigation">Arrow Navigation: Press <code>Shift + Left Arrow</code> or <code>Shift + Right Arrow</code> to navigate between pages.</li>
+                    <li data-i18n="help.keyboardNavigation">Keyboard Navigation: Use arrow keys to navigate between bookmarks on the dashboard. Press <code>Enter</code> or <code>Space</code> to open the selected bookmark.</li>
+                </ul>
+                
+                <h3 class="section-title">Search & Shortcuts</h3>
+                <ul>
+                    <li data-i18n="help.shortcutsLauncher">Bookmark Shortcuts: Press any letter key on the dashboard to start typing a shortcut. For example, if you have a bookmark with shortcut <code>yt</code>, just type <code>yt</code> and the app will open it automatically.</li>
+                    <li data-i18n="help.fuzzySearch">Fuzzy Search: Press <code>/</code> to search for bookmarks by name. Start typing and it will find matches as you go.</li>
+                    <li data-i18n="help.searchMode">Search Mode: You can switch the search behavior. By default, typing starts shortcuts and <code>/</code> starts fuzzy search. You can toggle this in <code>config#general</code>.</li>
+                </ul>
+                
+                <h3 class="section-title">Finders</h3>
+                <ul>
+                    <li data-i18n="help.findersIntro">Finders: Create shortcuts for search engines and websites. Start your search with <code>?</code> followed by your finder shortcut to quickly search on external sites.</li>
+                    <li data-i18n="help.findersActivation">Activation: Type <code>?shortcut searchterm</code> on the dashboard. For example, if you have a finder with shortcut <code>g</code> for Google, type <code>?g javascript</code> to search for "javascript" on Google.</li>
+                    <li data-i18n="help.findersConfig">Configuration: Go to <code>config#finders</code> to add, edit, or remove finders. Each finder needs a name, search URL, and shortcut.</li>
+                    <li data-i18n="help.findersUrlFormat">URL Format: Use <code>%s</code> in the URL where you want the search term to be inserted, or leave it out to append the search term to the end of the URL.</li>
+                </ul>
+                
+                <h3 class="section-title">Commands</h3>
+                <ul>
+                    <li data-i18n="help.commands">Commands: Type <code>:</code> followed by a command to control the app. Available commands include: <code>theme</code> (switch theme), <code>columns</code> (change columns), <code>fontsize</code> (change font size), and more to come.</li>
+                </ul>
+                
+                <h3 class="section-title">Data Storage</h3>
+                <ul>
+                    <li data-i18n="help.dataStorage">Data Storage: All app data is saved in the <code>/data</code> directory. This includes JSON files for settings (your dashboard settings), pages (pages order), and colors (custom themes), as well as uploaded favicon, fonts, and individual bookmark pages (bookmarks-1.json, bookmarks-2.json, etc.).</li>
+                    <li data-i18n="help.deviceSpecificSettings">Device-Specific Settings: When enabled, your dashboard settings are saved locally in your browser instead of on the server. This means settings are specific to this device/browser and won't sync across different devices.</li>
+                </ul>
+                                
+                <h3 class="section-title" data-i18n="help.chromeExtension">Chrome Extension</h3>
+                <p data-i18n="help.extensionIntro">ThinkDashboard includes a Chrome extension that allows you to quickly add bookmarks from any webpage directly to your dashboard.</p>
+                
+                <br>
+                
+                <ul>
+                    <li data-i18n="help.extensionInstall">To install the extension: Clone the <a href="https://github.com/MatiasDesuu/ThinkDashboard" target="_blank" rel="noopener noreferrer"><code>GitHub repository</code></a> to your local machine, or download the latest version from <a href="https://github.com/MatiasDesuu/ThinkDashboard/archive/refs/heads/main.zip" target="_blank" rel="noopener noreferrer"><code>here</code></a>. Then go to Chrome's extension settings (chrome://extensions/), enable "Developer mode", and click "Load unpacked". Select the <code>extension</code> folder from the downloaded or cloned repository.</li>
+                    <li data-i18n="help.extensionConfig">Configuration: Once installed, open the extension and go to the Settings tab. Enter your ThinkDashboard URL, set the Default Page where bookmarks will be saved, and choose the category within that page.</li>
+                    <li data-i18n="help.extensionUsage">Usage: Click the extension icon, optionally modify the name, URL, page, and category, then click Save Bookmark.</li>
+                </ul>
+
+                <h3 class="section-title">Feedback</h3>
+                <p data-i18n="help.feedback">Found a bug or have feedback? Visit the <a href="https://github.com/MatiasDesuu/ThinkDashboard" target="_blank" rel="noopener noreferrer"><code>GitHub repository</code></a> to report issues or suggest improvements.</p>
+
+            </div>
+            </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <script src="/static/js/modal.js"></script>
+    <script src="/static/js/status.js"></script>
+    <script src="/static/js/select.js"></script>
+    <script src="/static/js/reorder.js"></script>
+    <script src="/static/js/hypr-mode.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Config modules (must be loaded before main config.js) -->
+    <script src="/static/js/config/config-ui.js"></script>
+    <script src="/static/js/config/config-storage.js"></script>
+    <script src="/static/js/config/config-data.js"></script>
+    <script src="/static/js/config/config-pages.js"></script>
+    <script src="/static/js/config/config-categories.js"></script>
+    <script src="/static/js/config/config-bookmarks.js"></script>
+    <script src="/static/js/config/config-finders.js"></script>
+    <script src="/static/js/config/config-backup.js"></script>
+    <script src="/static/js/config/config-font.js"></script>
+    <script src="/static/js/config/config-settings.js"></script>
+    <script src="/static/js/config/config-language.js"></script>
+    <!-- Main config orchestrator -->
+    <script src="/static/js/config.js"></script>
+    <!-- Keyboard shortcuts -->
+    <script src="/static/js/config-keyboard.js"></script>
+</body>
+</html>
