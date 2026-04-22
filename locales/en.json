@@ -172,6 +172,7 @@
     "categoryNamePlaceholder": "Category name",
     "removeCategoryTitle": "Remove Category",
     "removeCategoryMessage": "Are you sure you want to remove this category? This action cannot be undone.",
+    "savingChanges": "Saving changes...",
     "newCategoryPrefix": "New Category",
     "customThemeNamePlaceholder": "Theme name",
     "removeCustomThemeTitle": "Remove Custom Theme",

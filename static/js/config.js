@@ -855,6 +855,8 @@ class ConfigManager {
     }
 
     async saveChanges() {
+        this.ui.showNotification(this.language.t('config.savingChanges'), 'info');
+
         try {
             this.settings.updateFromUI(this.settingsData);
             this.settingsData.currentPage = this.pagesData.length > 0 ? this.pagesData[0].id : 1;
