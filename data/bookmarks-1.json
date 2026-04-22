@@ -56,7 +56,8 @@
       "shortcut": "NOSNL",
       "category": "nieuws",
       "checkStatus": false,
-      "icon": ""
+      "icon": "",
+      "lastOpened": 1776853564442
     },
     {
       "name": "nytimes.com",

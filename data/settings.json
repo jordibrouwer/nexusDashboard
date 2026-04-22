@@ -1,6 +1,6 @@
 {
   "currentPage": 1,
-  "theme": "forest",
+  "theme": "nerd",
   "openInNewTab": true,
   "columnsPerRow": 5,
   "fontSize": "xs",
@@ -14,7 +14,7 @@
   "showSearchButtonText": true,
   "showFindersButtonText": true,
   "showCommandsButtonText": true,
-  "showStatus": false,
+  "showStatus": true,
   "showPing": false,
   "showStatusLoading": false,
   "skipFastPing": false,
