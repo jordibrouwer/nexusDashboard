@@ -18,6 +18,7 @@ class Dashboard {
             showTitle: true,
             showDate: true,
             showConfigButton: true,
+            showCheatSheetButton: true,
             showStatus: false,
             showPing: false,
             globalShortcuts: true,
@@ -337,6 +338,7 @@ class Dashboard {
         document.body.setAttribute('data-show-title', this.settings.showTitle);
         document.body.setAttribute('data-show-date', this.settings.showDate);
         document.body.setAttribute('data-show-config-button', this.settings.showConfigButton);
+        document.body.setAttribute('data-show-cheatsheet-button', this.settings.showCheatSheetButton !== false);
         document.body.setAttribute('data-show-search-button', this.settings.showSearchButton);
         document.body.setAttribute('data-show-finders-button', this.settings.showFindersButton);
         document.body.setAttribute('data-show-commands-button', this.settings.showCommandsButton);
@@ -656,8 +658,9 @@ class Dashboard {
                     { keys: '>', description: 'Open search' },
                     { keys: ':', description: 'Open command mode' },
                     { keys: '?', description: 'Open finders' },
+                    { keys: '!', description: 'Open keyboard cheat sheet' },
                     { keys: 'Ctrl + Shift + R', description: 'Open or close recent bookmarks' },
-                    { keys: 'Ctrl + / or F1', description: 'Show this keyboard cheat sheet' },
+                    { keys: 'Ctrl + / or F1', description: 'Open keyboard cheat sheet' },
                     { keys: 'tag:, category:, status:, page:', description: 'Filter search results by metadata' }
                 ]
             },

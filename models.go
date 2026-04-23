@@ -9,21 +9,21 @@ import (
 )
 
 type Bookmark struct {
-	Name          string `json:"name"`
-	URL           string `json:"url"`
-	PageID        int    `json:"pageId,omitempty"`
-	Shortcut      string `json:"shortcut"`
-	Category      string `json:"category"`
-	Pinned        bool   `json:"pinned,omitempty"`
-	CheckStatus   bool   `json:"checkStatus"`
-	Icon          string `json:"icon"`
-	LastOpened    int64  `json:"lastOpened,omitempty"`
-	LastChecked   int64  `json:"lastChecked,omitempty"`
-	LastError     string `json:"lastError,omitempty"`
-	OpenCount     int    `json:"openCount,omitempty"`     // Analytics: track opens
-	PreviewTitle  string `json:"previewTitle,omitempty"`  // Preview metadata
-	PreviewDesc   string `json:"previewDesc,omitempty"`   // Preview description
-	PreviewImage  string `json:"previewImage,omitempty"`  // Preview image URL
+	Name         string `json:"name"`
+	URL          string `json:"url"`
+	PageID       int    `json:"pageId,omitempty"`
+	Shortcut     string `json:"shortcut"`
+	Category     string `json:"category"`
+	Pinned       bool   `json:"pinned,omitempty"`
+	CheckStatus  bool   `json:"checkStatus"`
+	Icon         string `json:"icon"`
+	LastOpened   int64  `json:"lastOpened,omitempty"`
+	LastChecked  int64  `json:"lastChecked,omitempty"`
+	LastError    string `json:"lastError,omitempty"`
+	OpenCount    int    `json:"openCount,omitempty"`    // Analytics: track opens
+	PreviewTitle string `json:"previewTitle,omitempty"` // Preview metadata
+	PreviewDesc  string `json:"previewDesc,omitempty"`  // Preview description
+	PreviewImage string `json:"previewImage,omitempty"` // Preview image URL
 }
 
 type Finder struct {
@@ -55,51 +55,52 @@ type PageOrder struct {
 }
 
 type Settings struct {
-	CurrentPage               int    `json:"currentPage"` // Numeric ID of the current page
-	Theme                     string `json:"theme"`       // "light" or "dark"
-	OpenInNewTab              bool   `json:"openInNewTab"`
-	ColumnsPerRow             int    `json:"columnsPerRow"`
-	FontSize                  string `json:"fontSize"` // "small", "medium", or "large"
-	ShowBackgroundDots        bool   `json:"showBackgroundDots"`
-	ShowTitle                 bool   `json:"showTitle"`
-	ShowDate                  bool   `json:"showDate"`
-	ShowConfigButton          bool   `json:"showConfigButton"`
-	ShowSearchButton          bool   `json:"showSearchButton"`
-	ShowFindersButton         bool   `json:"showFindersButton"`
-	ShowCommandsButton        bool   `json:"showCommandsButton"`
-	ShowSearchButtonText      bool   `json:"showSearchButtonText"`
-	ShowFindersButtonText     bool   `json:"showFindersButtonText"`
-	ShowCommandsButtonText    bool   `json:"showCommandsButtonText"`
-	ShowStatus                bool   `json:"showStatus"`
-	ShowPing                  bool   `json:"showPing"`
-	ShowStatusLoading         bool   `json:"showStatusLoading"`
-	SkipFastPing              bool   `json:"skipFastPing"`
-	GlobalShortcuts           bool   `json:"globalShortcuts"`           // Use shortcuts from all pages
-	HyprMode                  bool   `json:"hyprMode"`                  // Launcher mode for PWA usage
-	AnimationsEnabled         bool   `json:"animationsEnabled"`         // Enable or disable animations globally
-	EnableCustomTitle         bool   `json:"enableCustomTitle"`         // Enable custom page title
-	CustomTitle               string `json:"customTitle"`               // Custom page title
-	ShowPageInTitle           bool   `json:"showPageInTitle"`           // Show current page name in title
-	ShowPageNamesInTabs       bool   `json:"showPageNamesInTabs"`       // Show page names in tabs instead of numbers
-	EnableCustomFavicon       bool   `json:"enableCustomFavicon"`       // Enable custom favicon
-	CustomFaviconPath         string `json:"customFaviconPath"`         // Path to custom favicon file
-	EnableCustomFont          bool   `json:"enableCustomFont"`          // Enable custom font
-	CustomFontPath            string `json:"customFontPath"`            // Path to custom font file
-	Language                  string `json:"language"`                  // Language code, e.g., "en" or "es"
-	InterleaveMode            bool   `json:"interleaveMode"`            // Interleave mode for search (/ for shortcuts, direct input for fuzzy)
-	ShowPageTabs              bool   `json:"showPageTabs"`              // Show page navigation tabs
-	AlwaysCollapseCategories  bool   `json:"alwaysCollapseCategories"`  // Always collapse categories on load
-	EnableFuzzySuggestions    bool   `json:"enableFuzzySuggestions"`    // Enable fuzzy suggestions in shortcut search
-	FuzzySuggestionsStartWith bool   `json:"fuzzySuggestionsStartWith"` // Fuzzy suggestions start with query instead of contains
-	KeepSearchOpenWhenEmpty   bool   `json:"keepSearchOpenWhenEmpty"`   // Keep search interface open when query is empty
-	ShowIcons                 bool   `json:"showIcons"`                 // Show bookmark icons
-	IncludeFindersInSearch    bool   `json:"includeFindersInSearch"`    // Include finders in normal search
-	SortMethod                string `json:"sortMethod"`                // Sort method for bookmarks: order, az, recent, custom
-	LayoutPreset              string `json:"layoutPreset"`              // Dashboard layout preset
-	BackgroundOpacity         float64 `json:"backgroundOpacity"`        // Background opacity (0.0-1.0)
-	FontWeight                string `json:"fontWeight"`                // Font weight: normal, 600, bold
-	AutoDarkMode              bool   `json:"autoDarkMode"`              // Auto-detect dark mode from system
-	SearchIndexed             bool   `json:"searchIndexed"`             // Is search index built
+	CurrentPage               int     `json:"currentPage"` // Numeric ID of the current page
+	Theme                     string  `json:"theme"`       // "light" or "dark"
+	OpenInNewTab              bool    `json:"openInNewTab"`
+	ColumnsPerRow             int     `json:"columnsPerRow"`
+	FontSize                  string  `json:"fontSize"` // "small", "medium", or "large"
+	ShowBackgroundDots        bool    `json:"showBackgroundDots"`
+	ShowTitle                 bool    `json:"showTitle"`
+	ShowDate                  bool    `json:"showDate"`
+	ShowConfigButton          bool    `json:"showConfigButton"`
+	ShowSearchButton          bool    `json:"showSearchButton"`
+	ShowFindersButton         bool    `json:"showFindersButton"`
+	ShowCommandsButton        bool    `json:"showCommandsButton"`
+	ShowCheatSheetButton      bool    `json:"showCheatSheetButton"`
+	ShowSearchButtonText      bool    `json:"showSearchButtonText"`
+	ShowFindersButtonText     bool    `json:"showFindersButtonText"`
+	ShowCommandsButtonText    bool    `json:"showCommandsButtonText"`
+	ShowStatus                bool    `json:"showStatus"`
+	ShowPing                  bool    `json:"showPing"`
+	ShowStatusLoading         bool    `json:"showStatusLoading"`
+	SkipFastPing              bool    `json:"skipFastPing"`
+	GlobalShortcuts           bool    `json:"globalShortcuts"`           // Use shortcuts from all pages
+	HyprMode                  bool    `json:"hyprMode"`                  // Launcher mode for PWA usage
+	AnimationsEnabled         bool    `json:"animationsEnabled"`         // Enable or disable animations globally
+	EnableCustomTitle         bool    `json:"enableCustomTitle"`         // Enable custom page title
+	CustomTitle               string  `json:"customTitle"`               // Custom page title
+	ShowPageInTitle           bool    `json:"showPageInTitle"`           // Show current page name in title
+	ShowPageNamesInTabs       bool    `json:"showPageNamesInTabs"`       // Show page names in tabs instead of numbers
+	EnableCustomFavicon       bool    `json:"enableCustomFavicon"`       // Enable custom favicon
+	CustomFaviconPath         string  `json:"customFaviconPath"`         // Path to custom favicon file
+	EnableCustomFont          bool    `json:"enableCustomFont"`          // Enable custom font
+	CustomFontPath            string  `json:"customFontPath"`            // Path to custom font file
+	Language                  string  `json:"language"`                  // Language code, e.g., "en" or "es"
+	InterleaveMode            bool    `json:"interleaveMode"`            // Interleave mode for search (/ for shortcuts, direct input for fuzzy)
+	ShowPageTabs              bool    `json:"showPageTabs"`              // Show page navigation tabs
+	AlwaysCollapseCategories  bool    `json:"alwaysCollapseCategories"`  // Always collapse categories on load
+	EnableFuzzySuggestions    bool    `json:"enableFuzzySuggestions"`    // Enable fuzzy suggestions in shortcut search
+	FuzzySuggestionsStartWith bool    `json:"fuzzySuggestionsStartWith"` // Fuzzy suggestions start with query instead of contains
+	KeepSearchOpenWhenEmpty   bool    `json:"keepSearchOpenWhenEmpty"`   // Keep search interface open when query is empty
+	ShowIcons                 bool    `json:"showIcons"`                 // Show bookmark icons
+	IncludeFindersInSearch    bool    `json:"includeFindersInSearch"`    // Include finders in normal search
+	SortMethod                string  `json:"sortMethod"`                // Sort method for bookmarks: order, az, recent, custom
+	LayoutPreset              string  `json:"layoutPreset"`              // Dashboard layout preset
+	BackgroundOpacity         float64 `json:"backgroundOpacity"`         // Background opacity (0.0-1.0)
+	FontWeight                string  `json:"fontWeight"`                // Font weight: normal, 600, bold
+	AutoDarkMode              bool    `json:"autoDarkMode"`              // Auto-detect dark mode from system
+	SearchIndexed             bool    `json:"searchIndexed"`             // Is search index built
 }
 
 type ColorTheme struct {
@@ -221,6 +222,7 @@ func (fs *FileStore) initializeDefaultFiles() {
 			ShowSearchButton:          true,
 			ShowFindersButton:         false,
 			ShowCommandsButton:        false,
+			ShowCheatSheetButton:      true,
 			ShowSearchButtonText:      true,
 			ShowFindersButtonText:     true,
 			ShowCommandsButtonText:    true,
@@ -751,6 +753,7 @@ func (fs *FileStore) GetSettings() Settings {
 			ShowSearchButton:          true,
 			ShowFindersButton:         false,
 			ShowCommandsButton:        false,
+			ShowCheatSheetButton:      true,
 			ShowSearchButtonText:      true,
 			ShowFindersButtonText:     true,
 			ShowCommandsButtonText:    true,
@@ -786,6 +789,13 @@ func (fs *FileStore) GetSettings() Settings {
 
 	var settings Settings
 	json.Unmarshal(data, &settings)
+
+	var rawSettings map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawSettings); err == nil {
+		if _, ok := rawSettings["showCheatSheetButton"]; !ok {
+			settings.ShowCheatSheetButton = true
+		}
+	}
 
 	// Set default language if empty
 	if settings.Language == "" {
@@ -962,10 +972,10 @@ func (fs *FileStore) SaveColors(colors ColorTheme) {
 
 // Analytics and metadata types
 type BookmarkAnalytics struct {
-	MostOpened   []BookmarkWithCount `json:"mostOpened"`
-	LeastUsed    []BookmarkWithCount `json:"leastUsed"`
-	TotalBookmarks int                `json:"totalBookmarks"`
-	UnusedCount   int                `json:"unusedCount"`
+	MostOpened     []BookmarkWithCount `json:"mostOpened"`
+	LeastUsed      []BookmarkWithCount `json:"leastUsed"`
+	TotalBookmarks int                 `json:"totalBookmarks"`
+	UnusedCount    int                 `json:"unusedCount"`
 }
 
 type BookmarkWithCount struct {
@@ -979,9 +989,9 @@ type DuplicateWarning struct {
 }
 
 type DuplicateGroup struct {
-	URL        string       `json:"url"`
+	URL        string        `json:"url"`
 	Bookmarks  []BookmarkRef `json:"bookmarks"`
-	MatchScore float64      `json:"matchScore"`
+	MatchScore float64       `json:"matchScore"`
 }
 
 type BookmarkRef struct {
@@ -996,23 +1006,23 @@ type SearchIndex struct {
 }
 
 type SearchEntry struct {
-	Name      string `json:"name"`
-	URL       string `json:"url"`
-	Shortcut  string `json:"shortcut"`
-	Category  string `json:"category"`
-	Keywords  string `json:"keywords"` // Combined searchable text
-	Index     int    `json:"index"`
-	PageID    int    `json:"pageId"`
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	Shortcut string `json:"shortcut"`
+	Category string `json:"category"`
+	Keywords string `json:"keywords"` // Combined searchable text
+	Index    int    `json:"index"`
+	PageID   int    `json:"pageId"`
 }
 
 // Undo/Redo history
 type HistoryEntry struct {
-	Timestamp   int64       `json:"timestamp"`
-	Action      string      `json:"action"` // "add", "remove", "update", "move"
-	PageID      int         `json:"pageId"`
-	Bookmark    *Bookmark   `json:"bookmark,omitempty"`
-	OldBookmark *Bookmark   `json:"oldBookmark,omitempty"`
-	Index       int         `json:"index"`
+	Timestamp   int64     `json:"timestamp"`
+	Action      string    `json:"action"` // "add", "remove", "update", "move"
+	PageID      int       `json:"pageId"`
+	Bookmark    *Bookmark `json:"bookmark,omitempty"`
+	OldBookmark *Bookmark `json:"oldBookmark,omitempty"`
+	Index       int       `json:"index"`
 }
 
 type UndoRedoManager struct {
@@ -1022,11 +1032,11 @@ type UndoRedoManager struct {
 
 // Bookmark preview metadata
 type BookmarkPreview struct {
-	URL       string `json:"url"`
-	Title     string `json:"title"`
+	URL         string `json:"url"`
+	Title       string `json:"title"`
 	Description string `json:"description"`
-	Image     string `json:"image"`
-	Domain    string `json:"domain"`
-	Icon      string `json:"icon"`
-	FetchedAt int64  `json:"fetchedAt"`
+	Image       string `json:"image"`
+	Domain      string `json:"domain"`
+	Icon        string `json:"icon"`
+	FetchedAt   int64  `json:"fetchedAt"`
 }

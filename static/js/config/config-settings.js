@@ -517,6 +517,15 @@ class ConfigSettings {
             });
         }
 
+        // Show cheatsheet button checkbox
+        const showCheatSheetButtonCheckbox = document.getElementById('show-cheatsheet-button-checkbox');
+        if (showCheatSheetButtonCheckbox) {
+            showCheatSheetButtonCheckbox.checked = settings.showCheatSheetButton !== false;
+            showCheatSheetButtonCheckbox.addEventListener('change', (e) => {
+                settings.showCheatSheetButton = e.target.checked;
+            });
+        }
+
         // Show search button text checkbox
         const showSearchButtonTextCheckbox = document.getElementById('show-search-button-text-checkbox');
         if (showSearchButtonTextCheckbox) {
@@ -656,6 +665,7 @@ class ConfigSettings {
         const showSearchButtonCheckbox = document.getElementById('show-search-button-checkbox');
         const showFindersButtonCheckbox = document.getElementById('show-finders-button-checkbox');
         const showCommandsButtonCheckbox = document.getElementById('show-commands-button-checkbox');
+        const showCheatSheetButtonCheckbox = document.getElementById('show-cheatsheet-button-checkbox');
         const showSearchButtonTextCheckbox = document.getElementById('show-search-button-text-checkbox');
         const showFindersButtonTextCheckbox = document.getElementById('show-finders-button-text-checkbox');
         const showCommandsButtonTextCheckbox = document.getElementById('show-commands-button-text-checkbox');
@@ -687,6 +697,7 @@ class ConfigSettings {
         if (showSearchButtonCheckbox) settings.showSearchButton = showSearchButtonCheckbox.checked;
         if (showFindersButtonCheckbox) settings.showFindersButton = showFindersButtonCheckbox.checked;
         if (showCommandsButtonCheckbox) settings.showCommandsButton = showCommandsButtonCheckbox.checked;
+        if (showCheatSheetButtonCheckbox) settings.showCheatSheetButton = showCheatSheetButtonCheckbox.checked;
         if (showSearchButtonTextCheckbox) settings.showSearchButtonText = showSearchButtonTextCheckbox.checked;
         if (showFindersButtonTextCheckbox) settings.showFindersButtonText = showFindersButtonTextCheckbox.checked;
         if (showCommandsButtonTextCheckbox) settings.showCommandsButtonText = showCommandsButtonTextCheckbox.checked;
@@ -941,6 +952,7 @@ class ConfigSettings {
             showSearchButton: true,
             showFindersButton: true,
             showCommandsButton: true,
+            showCheatSheetButton: true,
             showSearchButtonText: true,
             showFindersButtonText: true,
             showCommandsButtonText: true,

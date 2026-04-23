@@ -37,6 +37,7 @@ class ConfigManager {
             showBackgroundDots: true,
             showTitle: true,
             showDate: true,
+            showCheatSheetButton: true,
             showStatus: false,
             showPing: false,
             skipFastPing: false,
@@ -973,6 +974,7 @@ class ConfigManager {
         document.getElementById('show-search-button-checkbox').checked = this.settingsData.showSearchButton;
         document.getElementById('show-finders-button-checkbox').checked = this.settingsData.showFindersButton;
         document.getElementById('show-commands-button-checkbox').checked = this.settingsData.showCommandsButton;
+        document.getElementById('show-cheatsheet-button-checkbox').checked = this.settingsData.showCheatSheetButton;
         document.getElementById('show-search-button-text-checkbox').checked = this.settingsData.showSearchButtonText;
         document.getElementById('show-finders-button-text-checkbox').checked = this.settingsData.showFindersButtonText;
         document.getElementById('show-commands-button-text-checkbox').checked = this.settingsData.showCommandsButtonText;

@@ -11,6 +11,7 @@
   "showSearchButton": true,
   "showFindersButton": true,
   "showCommandsButton": false,
+  "showCheatSheetButton": true,
   "showSearchButtonText": true,
   "showFindersButtonText": true,
   "showCommandsButtonText": true,

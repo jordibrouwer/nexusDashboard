@@ -1,6 +1,6 @@
 /**
  * Keyboard Shortcuts Help Overlay
- * Show help on pressing ? or Escape (with shift)
+ * Show help on pressing ! or Escape
  */
 
 class KeyboardHelp {
@@ -47,7 +47,7 @@ class KeyboardHelp {
                             <ul>
                                 <li><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>A</kbd> - Quick add bookmark</li>
                                 <li><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>,</kbd> - Open config</li>
-                                <li><kbd>?</kbd> - Show this help</li>
+                                <li><kbd>!</kbd> - Show this help</li>
                                 <li><kbd>Ctrl</kbd> <kbd>Z</kbd> / <kbd>Y</kbd> - Undo/Redo (config)</li>
                             </ul>
                         </div>
@@ -96,8 +96,8 @@ class KeyboardHelp {
                 return;
             }
 
-            // ? to show help
-            if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            // ! to show help
+            if (e.key === '!' && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 this.toggle();
             }
             // Escape to hide
