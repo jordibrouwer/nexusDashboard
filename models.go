@@ -9,13 +9,13 @@ import (
 )
 
 type Bookmark struct {
-	Name         string `json:"name"`
-	URL          string `json:"url"`
-	PageID       int    `json:"pageId,omitempty"`
-	Shortcut     string `json:"shortcut"`
+	Name         string   `json:"name"`
+	URL          string   `json:"url"`
+	PageID       int      `json:"pageId,omitempty"`
+	Shortcut     string   `json:"shortcut"`
 	Category     string `json:"category"`
 	Pinned       bool   `json:"pinned,omitempty"`
-	CheckStatus  bool   `json:"checkStatus"`
+	CheckStatus  bool     `json:"checkStatus"`
 	Icon         string `json:"icon"`
 	LastOpened   int64  `json:"lastOpened,omitempty"`
 	LastChecked  int64  `json:"lastChecked,omitempty"`

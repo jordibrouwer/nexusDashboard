@@ -360,7 +360,6 @@ class SearchCommandNew {
             url: formData.get('url').trim(),
             shortcut: formData.get('shortcut').trim().toUpperCase(),
             category: formData.get('category'),
-            tags: [],
             pinned: false,
             checkStatus: formData.get('checkStatus') === 'on'
         };

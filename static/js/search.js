@@ -319,7 +319,6 @@ class SearchComponent {
 
     parseSearchFilters(query) {
         const filters = {
-            tag: '',
             category: '',
             status: '',
             page: ''
@@ -330,9 +329,7 @@ class SearchComponent {
 
         parts.forEach((part) => {
             const lower = part.toLowerCase();
-            if (lower.startsWith('tag:')) {
-                filters.tag = lower.slice(4);
-            } else if (lower.startsWith('category:')) {
+            if (lower.startsWith('category:')) {
                 filters.category = lower.slice(9);
             } else if (lower.startsWith('status:')) {
                 filters.status = lower.slice(7);
@@ -351,13 +348,6 @@ class SearchComponent {
 
     matchesAdvancedFilters(bookmark, filters) {
         if (!bookmark) return false;
-
-        if (filters.tag) {
-            const tags = Array.isArray(bookmark.tags) ? bookmark.tags.map((tag) => String(tag).toLowerCase()) : [];
-            if (!tags.some((tag) => tag.includes(filters.tag))) {
-                return false;
-            }
-        }
 
         if (filters.category) {
             const category = String(bookmark.category || '').toLowerCase();
@@ -445,7 +435,7 @@ class SearchComponent {
                 });
 
                 // Check if 'config' matches the current query
-                if ('config'.startsWith(searchQuery.toLowerCase()) && this.matchesAdvancedFilters({ category: 'config', tags: [] }, filters)) {
+                if ('config'.startsWith(searchQuery.toLowerCase()) && this.matchesAdvancedFilters({ category: 'config' }, filters)) {
                     this.searchMatches.push({ 
                         shortcut: 'config', 
                         bookmark: { name: this.language ? this.language.t('dashboard.configuration') : 'Configuration', url: '/config' }, 
@@ -454,7 +444,7 @@ class SearchComponent {
                 }
 
                 // Check if 'colors' matches the current query
-                if ('colors'.startsWith(searchQuery.toLowerCase()) && this.matchesAdvancedFilters({ category: 'colors', tags: [] }, filters)) {
+                if ('colors'.startsWith(searchQuery.toLowerCase()) && this.matchesAdvancedFilters({ category: 'colors' }, filters)) {
                     this.searchMatches.push({ 
                         shortcut: 'colors', 
                         bookmark: { name: this.language ? this.language.t('dashboard.colorCustomization') : 'Color Customization', url: '/colors' }, 

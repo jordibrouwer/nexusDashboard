@@ -309,6 +309,119 @@ body {
     max-width: 100%; /* Ensure bookmark doesn't exceed parent width */
 }
 
+a.bookmark-open {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+a.bookmark-open:hover {
+    color: var(--text-primary);
+}
+
+.bookmark-inline-edit-btn {
+    flex-shrink: 0;
+    border: 1px solid var(--border-primary);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--font-size-controls);
+    line-height: 1;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.bookmark-inline-edit-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.bookmark-pin-badge {
+    flex-shrink: 0;
+    font-size: var(--font-size-controls);
+    color: var(--text-tertiary);
+    text-transform: lowercase;
+}
+
+.bookmark-link.bookmark-inline-editing {
+    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 0.35rem 0;
+}
+
+.bookmark-inline-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.bookmark-inline-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.bookmark-inline-field.bookmark-inline-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.bookmark-inline-label {
+    font-size: var(--font-size-controls);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.bookmark-inline-input,
+.bookmark-inline-select {
+    width: 100%;
+    font-family: inherit;
+    font-size: var(--font-size-controls);
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-primary);
+}
+
+.bookmark-inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+}
+
+.bookmark-inline-action-btn {
+    border: 1px solid var(--border-primary);
+    background: var(--background-primary);
+    color: var(--text-primary);
+    font-size: var(--font-size-controls);
+    padding: 0.3rem 0.55rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.bookmark-inline-save {
+    border-color: var(--text-secondary);
+}
+
+.bookmark-inline-delete {
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.bookmark-inline-delete:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
 .bookmark-drag-handle {
     cursor: grab;
     opacity: 0.45;

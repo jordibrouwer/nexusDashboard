@@ -55,6 +55,7 @@ class Dashboard {
         this.pendingMetadataSave = null;
         this.notificationTimeout = null;
         this.language = new ConfigLanguage();
+        this.inlineEditingBookmarkIndex = null;
         this.init();
     }
 
@@ -675,6 +676,7 @@ class Dashboard {
                     { keys: '↑ / ↓', description: 'Move through bookmarks with keyboard focus' },
                     { keys: '← / →', description: 'Move horizontally through the bookmark grid' },
                     { keys: 'Enter / Space', description: 'Open the selected bookmark' },
+                    { keys: 'E', description: 'Inline-edit the selected bookmark (when edit control is shown)' },
                     { keys: 'Esc', description: 'Clear selection or undo the latest reorder' }
                 ]
             },
@@ -687,7 +689,7 @@ class Dashboard {
                     { keys: '!', description: 'Open keyboard cheat sheet' },
                     { keys: '*', description: 'Open or close recent bookmarks' },
                     { keys: 'Ctrl + / or F1', description: 'Open keyboard cheat sheet' },
-                    { keys: 'tag:, category:, status:, page:', description: 'Filter search results by metadata' }
+                    { keys: 'category:, status:, page:', description: 'Filter search results by metadata' }
                 ]
             },
             {
@@ -706,10 +708,19 @@ class Dashboard {
     setupBookmarkTracking() {
         // Track when bookmarks are opened
         document.addEventListener('click', (e) => {
-            const bookmarkLink = e.target.closest('a.bookmark-link, .bookmark');
-            if (bookmarkLink && bookmarkLink.dataset.bookmarkIndex) {
-                const index = parseInt(bookmarkLink.dataset.bookmarkIndex);
-                this.analytics?.trackBookmarkOpen(this.currentPageId, index);
+            if (e.target.closest('.bookmark-inline-edit-btn') || e.target.closest('.bookmark-inline-form')) {
+                return;
+            }
+            const openLink = e.target.closest('a.bookmark-open');
+            if (!openLink) {
+                return;
+            }
+            const bookmarkRow = openLink.closest('.bookmark-link[data-bookmark-index]');
+            if (bookmarkRow && bookmarkRow.dataset.bookmarkIndex !== undefined) {
+                const index = parseInt(bookmarkRow.dataset.bookmarkIndex, 10);
+                if (!Number.isNaN(index) && index >= 0) {
+                    this.analytics?.trackBookmarkOpen(this.currentPageId, index);
+                }
             }
         });
     }
@@ -1070,7 +1081,7 @@ class Dashboard {
         }
 
         bookmarks.forEach(bookmark => {
-            const bookmarkElement = this.createBookmarkElement(bookmark, category.id || '');
+            const bookmarkElement = this.createBookmarkElement(bookmark, category.id || '', !isSmartCollection);
             bookmarksList.appendChild(bookmarkElement);
         });
 
@@ -1152,16 +1163,48 @@ class Dashboard {
         return this.bookmarks;
     }
 
-    createBookmarkElement(bookmark, categoryId) {
-        const link = document.createElement('a');
-        link.href = bookmark.url;
-        link.className = 'bookmark-link';
-        link.setAttribute('data-bookmark-url', bookmark.url);
-        link.setAttribute('data-bookmark-index', String(this.bookmarks.indexOf(bookmark)));
-        link.setAttribute('data-category-id', categoryId);
+    ensureBookmarkMutationSnapshot() {
+        if (!this.pendingReorderSnapshot) {
+            this.pendingReorderSnapshot = this.bookmarks.map((bm) => ({ ...bm }));
+        }
+    }
 
-        // Bookmark link itself should remain clickable; drag happens from the handle
-        link.draggable = false;
+    tryOpenInlineBookmarkEdit() {
+        const kn = this.keyboardNavigation;
+        if (!kn || kn.currentIndex < 0 || !Array.isArray(kn.navigableElements)) {
+            return;
+        }
+        const el = kn.navigableElements[kn.currentIndex];
+        if (!el || el.classList.contains('bookmark-inline-editing')) {
+            return;
+        }
+        const btn = el.querySelector('.bookmark-inline-edit-btn');
+        if (btn) {
+            btn.click();
+        }
+    }
+
+    resolveBookmarkIndex(bookmark) {
+        let idx = this.bookmarks.indexOf(bookmark);
+        if (idx === -1 && bookmark && bookmark.url) {
+            const u = (bookmark.url || '').trim();
+            idx = this.bookmarks.findIndex((b) => (b.url || '').trim() === u);
+        }
+        return idx;
+    }
+
+    populateBookmarkRowView(row, bookmark, categoryId, allowInlineEdit) {
+        const bookmarkIndex = this.resolveBookmarkIndex(bookmark);
+        row.classList.remove('bookmark-inline-editing');
+        row.innerHTML = '';
+        row.className = 'bookmark-link';
+        row.setAttribute('data-bookmark-url', bookmark.url || '');
+        if (bookmarkIndex >= 0) {
+            row.setAttribute('data-bookmark-index', String(bookmarkIndex));
+        } else {
+            row.removeAttribute('data-bookmark-index');
+        }
+        row.setAttribute('data-category-id', categoryId);
 
         const dragHandle = document.createElement('span');
         dragHandle.className = 'bookmark-drag-handle';
@@ -1169,68 +1212,51 @@ class Dashboard {
         dragHandle.setAttribute('title', 'Drag to reorder');
         dragHandle.setAttribute('aria-hidden', 'true');
         dragHandle.addEventListener('click', (e) => {
-            // Prevent accidental navigation when pressing the handle
             e.preventDefault();
         });
-        link.appendChild(dragHandle);
-        
-        // Add icon if exists and showIcons is enabled
+        row.appendChild(dragHandle);
+
         if (bookmark.icon && this.settings.showIcons) {
             const placeholder = document.createElement('span');
             placeholder.className = 'icon-placeholder';
-            link.appendChild(placeholder);
+            row.appendChild(placeholder);
 
             const iconImg = document.createElement('img');
             iconImg.src = `/data/icons/${bookmark.icon}`;
             iconImg.className = 'bookmark-icon';
             iconImg.alt = '';
             iconImg.loading = 'lazy';
-            iconImg.addEventListener('load', () => {
-                placeholder.remove();
-            });
-            iconImg.addEventListener('error', () => {
-                placeholder.remove();
-            });
-            link.appendChild(iconImg);
+            iconImg.addEventListener('load', () => placeholder.remove());
+            iconImg.addEventListener('error', () => placeholder.remove());
+            row.appendChild(iconImg);
         }
-        
-        // Create text wrapper for ellipsis
+
+        const openLink = document.createElement('a');
+        openLink.className = 'bookmark-open';
+        openLink.href = bookmark.url || '#';
         const textSpan = document.createElement('span');
         textSpan.className = 'bookmark-text';
-        textSpan.textContent = bookmark.name;
-        link.appendChild(textSpan);
-        
-        // Always add click handler to check HyprMode dynamically
-        link.addEventListener('click', (e) => {
+        textSpan.textContent = bookmark.name || '';
+        openLink.appendChild(textSpan);
+
+        openLink.addEventListener('click', (e) => {
             this.recordBookmarkOpened(bookmark);
-            // Check if HyprMode is enabled at click time
             if (window.hyprMode && window.hyprMode.isEnabled()) {
                 e.preventDefault();
                 window.hyprMode.handleBookmarkClick(bookmark.url);
             }
-            // If HyprMode is not enabled, let the default behavior happen
-            // (which will be controlled by target="_blank" if openInNewTab is true)
         });
-        
-        // Set target for new tab if openInNewTab is enabled and HyprMode is not
-        if (this.settings.openInNewTab) {
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-        }
 
-        // Add shortcut indicator if exists
-        if (bookmark.shortcut && bookmark.shortcut.trim()) {
-            const shortcutSpan = document.createElement('span');
-            shortcutSpan.className = 'bookmark-shortcut';
-            shortcutSpan.textContent = bookmark.shortcut.toUpperCase();
-            link.appendChild(shortcutSpan);
+        if (this.settings.openInNewTab) {
+            openLink.target = '_blank';
+            openLink.rel = 'noopener noreferrer';
         }
 
         if (bookmark.previewTitle || bookmark.previewDesc) {
-            link.title = `${bookmark.previewTitle || bookmark.name}${bookmark.previewDesc ? `\n${bookmark.previewDesc}` : ''}`;
+            openLink.title = `${bookmark.previewTitle || bookmark.name}${bookmark.previewDesc ? `\n${bookmark.previewDesc}` : ''}`;
         } else {
-            link.addEventListener('mouseenter', async () => {
-                if (link.dataset.previewLoaded === 'true') {
+            openLink.addEventListener('mouseenter', async () => {
+                if (openLink.dataset.previewLoaded === 'true') {
                     return;
                 }
                 try {
@@ -1241,15 +1267,279 @@ class Dashboard {
                     const preview = await response.json();
                     const title = preview.title || bookmark.name;
                     const description = preview.description || '';
-                    link.title = `${title}${description ? `\n${description}` : ''}`;
-                    link.dataset.previewLoaded = 'true';
+                    openLink.title = `${title}${description ? `\n${description}` : ''}`;
+                    openLink.dataset.previewLoaded = 'true';
                 } catch (error) {
-                    link.dataset.previewLoaded = 'true';
+                    openLink.dataset.previewLoaded = 'true';
                 }
             }, { once: true });
         }
 
-        return link;
+        row.appendChild(openLink);
+
+        if (bookmark.shortcut && String(bookmark.shortcut).trim()) {
+            const shortcutSpan = document.createElement('span');
+            shortcutSpan.className = 'bookmark-shortcut';
+            shortcutSpan.textContent = String(bookmark.shortcut).toUpperCase();
+            row.appendChild(shortcutSpan);
+        }
+
+        if (bookmark.pinned) {
+            const pinBadge = document.createElement('span');
+            pinBadge.className = 'bookmark-pin-badge';
+            pinBadge.textContent = 'pin';
+            pinBadge.title = 'Pinned';
+            row.appendChild(pinBadge);
+        }
+
+        if (allowInlineEdit && bookmarkIndex >= 0) {
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'bookmark-inline-edit-btn';
+            editBtn.setAttribute('aria-label', 'Edit bookmark');
+            editBtn.title = 'Edit';
+            editBtn.textContent = '✎';
+            editBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.openBookmarkInlineEditor(row, bookmarkIndex);
+            });
+            row.appendChild(editBtn);
+        }
+    }
+
+    openBookmarkInlineEditor(row, bookmarkIndex) {
+        if (row.closest('[data-smart-collection="true"]')) {
+            return;
+        }
+        if (!Number.isFinite(bookmarkIndex) || bookmarkIndex < 0) {
+            return;
+        }
+        const bookmark = this.bookmarks[bookmarkIndex];
+        if (!bookmark) {
+            return;
+        }
+
+        this.inlineEditingBookmarkIndex = bookmarkIndex;
+        row.classList.add('bookmark-inline-editing');
+        row.innerHTML = '';
+
+        const form = document.createElement('div');
+        form.className = 'bookmark-inline-form';
+
+        const mkField = (labelText, inputEl) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'bookmark-inline-field';
+            const lab = document.createElement('label');
+            lab.className = 'bookmark-inline-label';
+            lab.textContent = labelText;
+            wrap.appendChild(lab);
+            wrap.appendChild(inputEl);
+            return wrap;
+        };
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'bookmark-inline-input';
+        nameInput.value = bookmark.name || '';
+        form.appendChild(mkField('Name', nameInput));
+
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.className = 'bookmark-inline-input';
+        urlInput.value = bookmark.url || '';
+        form.appendChild(mkField('URL', urlInput));
+
+        const shortcutInput = document.createElement('input');
+        shortcutInput.type = 'text';
+        shortcutInput.className = 'bookmark-inline-input';
+        shortcutInput.maxLength = 5;
+        shortcutInput.value = (bookmark.shortcut || '').toUpperCase();
+        shortcutInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+        });
+        form.appendChild(mkField('Shortcut', shortcutInput));
+
+        const catSelect = document.createElement('select');
+        catSelect.className = 'bookmark-inline-select';
+        const optEmpty = document.createElement('option');
+        optEmpty.value = '';
+        optEmpty.textContent = '—';
+        catSelect.appendChild(optEmpty);
+        (this.categories || []).forEach((cat) => {
+            const o = document.createElement('option');
+            o.value = cat.id || '';
+            o.textContent = cat.name || cat.id || '';
+            if ((bookmark.category || '') === (cat.id || '')) {
+                o.selected = true;
+            }
+            catSelect.appendChild(o);
+        });
+        form.appendChild(mkField('Category', catSelect));
+
+        const pinInput = document.createElement('input');
+        pinInput.type = 'checkbox';
+        pinInput.id = `bookmark-inline-pin-${bookmarkIndex}`;
+        pinInput.checked = Boolean(bookmark.pinned);
+        const pinWrap = document.createElement('div');
+        pinWrap.className = 'bookmark-inline-field bookmark-inline-check';
+        const pinLabel = document.createElement('label');
+        pinLabel.htmlFor = pinInput.id;
+        pinLabel.textContent = 'Pinned';
+        pinWrap.appendChild(pinInput);
+        pinWrap.appendChild(pinLabel);
+        form.appendChild(pinWrap);
+
+        const statusInput = document.createElement('input');
+        statusInput.type = 'checkbox';
+        statusInput.id = `bookmark-inline-status-${bookmarkIndex}`;
+        statusInput.checked = Boolean(bookmark.checkStatus);
+        const statusWrap = document.createElement('div');
+        statusWrap.className = 'bookmark-inline-field bookmark-inline-check';
+        const statusLabel = document.createElement('label');
+        statusLabel.htmlFor = statusInput.id;
+        statusLabel.textContent = 'Check status';
+        statusWrap.appendChild(statusInput);
+        statusWrap.appendChild(statusLabel);
+        form.appendChild(statusWrap);
+
+        const actions = document.createElement('div');
+        actions.className = 'bookmark-inline-actions';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'bookmark-inline-action-btn bookmark-inline-save';
+        saveBtn.textContent = 'Save';
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await this.commitBookmarkInlineEdit(bookmarkIndex, {
+                nameInput,
+                urlInput,
+                shortcutInput,
+                catSelect,
+                pinInput,
+                statusInput
+            });
+        });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'bookmark-inline-action-btn';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.cancelBookmarkInlineEdit(row, bookmarkIndex);
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'bookmark-inline-action-btn bookmark-inline-delete';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await this.deleteBookmarkAtIndexInline(bookmarkIndex);
+        });
+
+        actions.appendChild(saveBtn);
+        actions.appendChild(cancelBtn);
+        actions.appendChild(deleteBtn);
+        form.appendChild(actions);
+
+        form.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.cancelBookmarkInlineEdit(row, bookmarkIndex);
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                saveBtn.click();
+            }
+        });
+
+        row.appendChild(form);
+        this.destroyCategoryReorderInstances();
+        this.initializeCategoryReorder();
+        nameInput.focus();
+        nameInput.select();
+    }
+
+    async commitBookmarkInlineEdit(bookmarkIndex, fields) {
+        const bookmark = this.bookmarks[bookmarkIndex];
+        if (!bookmark) {
+            return;
+        }
+
+        const name = fields.nameInput.value.trim();
+        const url = fields.urlInput.value.trim();
+        const shortcut = fields.shortcutInput.value.trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5);
+        const category = fields.catSelect.value;
+
+        if (!name || !url) {
+            this.showErrorNotification('Name and URL are required.');
+            return;
+        }
+
+        this.ensureBookmarkMutationSnapshot();
+        bookmark.name = name;
+        bookmark.url = url;
+        bookmark.shortcut = shortcut;
+        bookmark.category = category;
+        bookmark.pinned = fields.pinInput.checked;
+        bookmark.checkStatus = fields.statusInput.checked;
+
+        this.inlineEditingBookmarkIndex = null;
+        this.renderDashboard();
+        this.scheduleBookmarkOrderSave();
+    }
+
+    cancelBookmarkInlineEdit(row, bookmarkIndex) {
+        const bookmark = this.bookmarks[bookmarkIndex];
+        if (!bookmark) {
+            this.inlineEditingBookmarkIndex = null;
+            this.renderDashboard();
+            return;
+        }
+        const categoryId = row.getAttribute('data-category-id') || bookmark.category || '';
+        this.inlineEditingBookmarkIndex = null;
+        this.populateBookmarkRowView(row, bookmark, categoryId, true);
+        this.destroyCategoryReorderInstances();
+        this.initializeCategoryReorder();
+    }
+
+    async deleteBookmarkAtIndexInline(bookmarkIndex) {
+        const bookmark = this.bookmarks[bookmarkIndex];
+        if (!bookmark) {
+            return;
+        }
+
+        let confirmed = false;
+        if (window.AppModal && typeof window.AppModal.danger === 'function') {
+            const safeName = String(bookmark.name || 'Bookmark').replace(/</g, '');
+            confirmed = await window.AppModal.danger({
+                title: 'Delete bookmark',
+                message: `Remove "${safeName}"?`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel'
+            });
+        } else {
+            confirmed = window.confirm('Delete this bookmark?');
+        }
+
+        if (!confirmed) {
+            return;
+        }
+
+        this.ensureBookmarkMutationSnapshot();
+        this.bookmarks.splice(bookmarkIndex, 1);
+        this.inlineEditingBookmarkIndex = null;
+        this.renderDashboard();
+        this.scheduleBookmarkOrderSave();
+    }
+
+    createBookmarkElement(bookmark, categoryId, allowInlineEdit = true) {
+        const row = document.createElement('div');
+        this.populateBookmarkRowView(row, bookmark, categoryId, allowInlineEdit);
+        return row;
     }
 
     createRecentBookmarkElement(bookmark) {
@@ -1441,7 +1731,7 @@ class Dashboard {
         bookmarksList.innerHTML = '';
         const sortedRecent = [...recentCollection.bookmarks].sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
         sortedRecent.forEach((recentBookmark, index) => {
-            const recentElement = this.createBookmarkElement(recentBookmark, recentCollection.id);
+            const recentElement = this.createBookmarkElement(recentBookmark, recentCollection.id, false);
             if (index === 0 && recentBookmark.url === url) {
                 recentElement.classList.add('smart-recent-promote');
             }

@@ -118,6 +118,21 @@ class KeyboardNavigation {
                 e.preventDefault();
                 this.selectCurrentElement();
                 break;
+
+            case 'e':
+            case 'E':
+                if (
+                    this.currentIndex >= 0 &&
+                    this.dashboard &&
+                    typeof this.dashboard.tryOpenInlineBookmarkEdit === 'function'
+                ) {
+                    const el = this.navigableElements[this.currentIndex];
+                    if (el && el.querySelector && el.querySelector('.bookmark-inline-edit-btn')) {
+                        e.preventDefault();
+                        this.dashboard.tryOpenInlineBookmarkEdit();
+                    }
+                }
+                break;
             
             case 'Escape':
                 e.preventDefault();
@@ -381,9 +396,12 @@ class KeyboardNavigation {
     selectCurrentElement() {
         if (this.currentIndex >= 0 && this.currentIndex < this.navigableElements.length) {
             const currentElement = this.navigableElements[this.currentIndex];
-            
-            // Trigger a click on the element
-            currentElement.click();
+            const openLink = currentElement.querySelector && currentElement.querySelector('a.bookmark-open');
+            if (openLink) {
+                openLink.click();
+            } else {
+                currentElement.click();
+            }
         }
     }
 
