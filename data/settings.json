@@ -44,5 +44,9 @@
   "backgroundOpacity": 1,
   "fontWeight": "normal",
   "autoDarkMode": false,
+  "showSmartRecentCollection": false,
+  "showSmartStaleCollection": false,
+  "smartRecentPageIds": [],
+  "smartStalePageIds": [],
   "searchIndexed": true
 }

@@ -36,7 +36,11 @@ class Dashboard {
             layoutPreset: 'default',
             backgroundOpacity: 1,
             fontWeight: 'normal',
-            autoDarkMode: false
+            autoDarkMode: false,
+            showSmartRecentCollection: true,
+            showSmartStaleCollection: true,
+            smartRecentPageIds: [],
+            smartStalePageIds: []
         };
         this.searchComponent = null;
         this.statusMonitor = null;
@@ -117,6 +121,19 @@ class Dashboard {
                 this.settings.customFaviconPath = serverSettings.customFaviconPath;
             } else {
                 this.settings = serverSettings;
+            }
+
+            if (!Array.isArray(this.settings.smartRecentPageIds)) {
+                this.settings.smartRecentPageIds = [];
+            }
+            if (!Array.isArray(this.settings.smartStalePageIds)) {
+                this.settings.smartStalePageIds = [];
+            }
+            if (typeof this.settings.showSmartRecentCollection === 'undefined') {
+                this.settings.showSmartRecentCollection = true;
+            }
+            if (typeof this.settings.showSmartStaleCollection === 'undefined') {
+                this.settings.showSmartStaleCollection = true;
             }
 
             // Update document title based on custom title settings
@@ -752,6 +769,21 @@ class Dashboard {
             return;
         }
 
+        // Render smart collections first for quick access to derived sets.
+        const smartCollections = this.getSmartCollections(this.bookmarks);
+        smartCollections.forEach((collection) => {
+            if (!Array.isArray(collection.bookmarks) || collection.bookmarks.length === 0) {
+                return;
+            }
+            const collectionElement = this.createCategoryElement({
+                id: collection.id,
+                name: collection.name,
+                icon: collection.icon,
+                isSmartCollection: true
+            }, this.sortBookmarks(collection.bookmarks));
+            container.appendChild(collectionElement);
+        });
+
         // Render categories
         this.categories.forEach(category => {
             const categoryBookmarks = this.sortBookmarks(groupedBookmarks[category.id] || []);
@@ -834,6 +866,9 @@ class Dashboard {
 
         const categoryLists = document.querySelectorAll('.bookmarks-list[data-category-id]');
         categoryLists.forEach((listElement) => {
+            if (listElement.getAttribute('data-smart-collection') === 'true') {
+                return;
+            }
             const categoryId = listElement.getAttribute('data-category-id') || '';
 
             const reorderInstance = new DragReorder({
@@ -870,6 +905,9 @@ class Dashboard {
 
         const categoryLists = document.querySelectorAll('.bookmarks-list[data-category-id]');
         categoryLists.forEach((listElement) => {
+            if (listElement.getAttribute('data-smart-collection') === 'true') {
+                return;
+            }
             const categoryId = listElement.getAttribute('data-category-id') || '';
             const listBookmarks = listElement.querySelectorAll('.bookmark-link[data-bookmark-index]');
 
@@ -966,15 +1004,33 @@ class Dashboard {
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'category';
         categoryDiv.setAttribute('data-category-id', category.id || '');
-        const isCollapsed = this.settings.alwaysCollapseCategories ? true : (this.collapsedCategories[category.id] || false);
+        const isSmartCollection = category.isSmartCollection === true;
+        const isCollapsed = isSmartCollection
+            ? false
+            : (this.settings.alwaysCollapseCategories ? true : (this.collapsedCategories[category.id] || false));
         categoryDiv.setAttribute('data-collapsed', isCollapsed ? 'true' : 'false');
 
         // Category title
         const titleElement = document.createElement('h2');
         titleElement.className = 'category-title';
-        const categoryIcon = category.icon || '▣';
-        titleElement.textContent = `${categoryIcon} ${category.name.toLowerCase()}`;
+        const categoryIcon = (category.icon || '').trim();
+        titleElement.innerHTML = '';
+
+        if (this.isUploadedCategoryIcon(categoryIcon)) {
+            const iconImage = document.createElement('img');
+            iconImage.src = `/data/icons/${categoryIcon}`;
+            iconImage.alt = '';
+            iconImage.className = 'bookmark-icon';
+            titleElement.appendChild(iconImage);
+            titleElement.appendChild(document.createTextNode(` ${category.name.toLowerCase()}`));
+        } else {
+            const textIcon = categoryIcon || '▣';
+            titleElement.textContent = `${textIcon} ${category.name.toLowerCase()}`;
+        }
         titleElement.addEventListener('click', () => {
+            if (isSmartCollection) {
+                return;
+            }
             const isCollapsed = categoryDiv.getAttribute('data-collapsed') === 'true';
             categoryDiv.setAttribute('data-collapsed', isCollapsed ? 'false' : 'true');
             this.collapsedCategories[category.id] = !isCollapsed;
@@ -987,6 +1043,9 @@ class Dashboard {
         bookmarksList.className = 'bookmarks-list';
         bookmarksList.setAttribute('data-category-id', category.id || '');
         bookmarksList.setAttribute('data-bookmarks-list', 'true');
+        if (isSmartCollection) {
+            bookmarksList.setAttribute('data-smart-collection', 'true');
+        }
 
         bookmarks.forEach(bookmark => {
             const bookmarkElement = this.createBookmarkElement(bookmark, category.id || '');
@@ -995,6 +1054,57 @@ class Dashboard {
 
         categoryDiv.appendChild(bookmarksList);
         return categoryDiv;
+    }
+
+    isUploadedCategoryIcon(iconValue) {
+        return typeof iconValue === 'string' && /\.[a-z0-9]+$/i.test(iconValue);
+    }
+
+    getSmartCollections(bookmarks) {
+        const now = Date.now();
+        const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+        const staleWindowMs = 30 * 24 * 60 * 60 * 1000;
+        const normalized = Array.isArray(bookmarks) ? bookmarks : [];
+        const currentPageId = Number(this.currentPageId);
+
+        const pageAllowed = (pageIds) => {
+            if (!Array.isArray(pageIds) || pageIds.length === 0) {
+                return true;
+            }
+            return pageIds.includes(currentPageId);
+        };
+
+        const recentBookmarks = normalized.filter((bookmark) => {
+            const lastOpened = Number(bookmark.lastOpened || 0);
+            return lastOpened > 0 && (now - lastOpened) <= oneWeekMs;
+        });
+
+        const staleBookmarks = normalized.filter((bookmark) => {
+            const lastOpened = Number(bookmark.lastOpened || 0);
+            return lastOpened === 0 || (now - lastOpened) > staleWindowMs;
+        });
+
+        const collections = [];
+
+        if (this.settings.showSmartRecentCollection !== false && pageAllowed(this.settings.smartRecentPageIds)) {
+            collections.push({
+                id: '__smart_recent__',
+                name: 'Smart: Recently opened',
+                icon: '⚡',
+                bookmarks: recentBookmarks
+            });
+        }
+
+        if (this.settings.showSmartStaleCollection !== false && pageAllowed(this.settings.smartStalePageIds)) {
+            collections.push({
+                id: '__smart_stale__',
+                name: 'Smart: Stale bookmarks',
+                icon: '⌛',
+                bookmarks: staleBookmarks
+            });
+        }
+
+        return collections;
     }
 
     createBookmarkElement(bookmark, categoryId) {

@@ -100,6 +100,10 @@ type Settings struct {
 	BackgroundOpacity         float64 `json:"backgroundOpacity"`         // Background opacity (0.0-1.0)
 	FontWeight                string  `json:"fontWeight"`                // Font weight: normal, 600, bold
 	AutoDarkMode              bool    `json:"autoDarkMode"`              // Auto-detect dark mode from system
+	ShowSmartRecentCollection bool    `json:"showSmartRecentCollection"` // Show smart recently opened collection
+	ShowSmartStaleCollection  bool    `json:"showSmartStaleCollection"`  // Show smart stale bookmarks collection
+	SmartRecentPageIds        []int   `json:"smartRecentPageIds"`        // Page IDs where smart recent is enabled (empty = all)
+	SmartStalePageIds         []int   `json:"smartStalePageIds"`         // Page IDs where smart stale is enabled (empty = all)
 	SearchIndexed             bool    `json:"searchIndexed"`             // Is search index built
 }
 
@@ -255,6 +259,10 @@ func (fs *FileStore) initializeDefaultFiles() {
 			BackgroundOpacity:         1,
 			FontWeight:                "normal",
 			AutoDarkMode:              false,
+			ShowSmartRecentCollection: true,
+			ShowSmartStaleCollection:  true,
+			SmartRecentPageIds:        []int{},
+			SmartStalePageIds:         []int{},
 		}
 		data, _ := json.MarshalIndent(defaultSettings, "", "  ")
 		os.WriteFile(fs.settingsFile, data, 0644)
@@ -784,6 +792,10 @@ func (fs *FileStore) GetSettings() Settings {
 			BackgroundOpacity:         1,
 			FontWeight:                "normal",
 			AutoDarkMode:              false,
+			ShowSmartRecentCollection: true,
+			ShowSmartStaleCollection:  true,
+			SmartRecentPageIds:        []int{},
+			SmartStalePageIds:         []int{},
 		}
 	}
 
@@ -794,6 +806,18 @@ func (fs *FileStore) GetSettings() Settings {
 	if err := json.Unmarshal(data, &rawSettings); err == nil {
 		if _, ok := rawSettings["showCheatSheetButton"]; !ok {
 			settings.ShowCheatSheetButton = true
+		}
+		if _, ok := rawSettings["showSmartRecentCollection"]; !ok {
+			settings.ShowSmartRecentCollection = true
+		}
+		if _, ok := rawSettings["showSmartStaleCollection"]; !ok {
+			settings.ShowSmartStaleCollection = true
+		}
+		if _, ok := rawSettings["smartRecentPageIds"]; !ok || settings.SmartRecentPageIds == nil {
+			settings.SmartRecentPageIds = []int{}
+		}
+		if _, ok := rawSettings["smartStalePageIds"]; !ok || settings.SmartStalePageIds == nil {
+			settings.SmartStalePageIds = []int{}
 		}
 	}
 
@@ -974,14 +998,18 @@ func (fs *FileStore) SaveColors(colors ColorTheme) {
 type BookmarkAnalytics struct {
 	MostOpened     []BookmarkWithCount `json:"mostOpened"`
 	LeastUsed      []BookmarkWithCount `json:"leastUsed"`
+	StaleBookmarks []BookmarkWithCount `json:"staleBookmarks"`
 	TotalBookmarks int                 `json:"totalBookmarks"`
 	UnusedCount    int                 `json:"unusedCount"`
+	StaleCount     int                 `json:"staleCount"`
 }
 
 type BookmarkWithCount struct {
-	Name      string `json:"name"`
-	URL       string `json:"url"`
-	OpenCount int    `json:"openCount"`
+	Name       string `json:"name"`
+	URL        string `json:"url"`
+	OpenCount  int    `json:"openCount"`
+	LastOpened int64  `json:"lastOpened,omitempty"`
+	PageID     int    `json:"pageId,omitempty"`
 }
 
 type DuplicateWarning struct {

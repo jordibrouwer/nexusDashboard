@@ -616,11 +616,14 @@ func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 // Analytics endpoint
 func (h *Handlers) GetAnalytics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	pages := h.store.GetPages()
 	var allBookmarks []BookmarkWithCount
 	var unusedCount int
-	
+	var staleBookmarks []BookmarkWithCount
+	nowMillis := time.Now().UnixMilli()
+	const staleThresholdMillis = int64(30 * 24 * 60 * 60 * 1000) // 30 days
+
 	for _, page := range pages {
 		bookmarks := h.store.GetBookmarksByPage(page.ID)
 		for _, bm := range bookmarks {
@@ -631,21 +634,35 @@ func (h *Handlers) GetAnalytics(w http.ResponseWriter, r *http.Request) {
 			}
 
 			allBookmarks = append(allBookmarks, BookmarkWithCount{
-				Name:      bm.Name,
-				URL:       bm.URL,
-				OpenCount: effectiveOpenCount,
+				Name:       bm.Name,
+				URL:        bm.URL,
+				OpenCount:  effectiveOpenCount,
+				LastOpened: bm.LastOpened,
+				PageID:     page.ID,
 			})
 			if effectiveOpenCount == 0 {
 				unusedCount++
 			}
+
+			isStale := bm.LastOpened == 0 || (nowMillis-bm.LastOpened) > staleThresholdMillis
+			if isStale {
+				staleBookmarks = append(staleBookmarks, BookmarkWithCount{
+					Name:       bm.Name,
+					URL:        bm.URL,
+					OpenCount:  effectiveOpenCount,
+					LastOpened: bm.LastOpened,
+					PageID:     page.ID,
+				})
+			}
 		}
 	}
-	
+
 	analytics := BookmarkAnalytics{
 		TotalBookmarks: len(allBookmarks),
 		UnusedCount:    unusedCount,
+		StaleCount:     len(staleBookmarks),
 	}
-	
+
 	// Sort for most opened
 	if len(allBookmarks) > 0 {
 		sort.Slice(allBookmarks, func(i, j int) bool {
@@ -653,7 +670,22 @@ func (h *Handlers) GetAnalytics(w http.ResponseWriter, r *http.Request) {
 		})
 		analytics.MostOpened = allBookmarks
 	}
-	
+
+	if len(staleBookmarks) > 0 {
+		sort.Slice(staleBookmarks, func(i, j int) bool {
+			left := staleBookmarks[i].LastOpened
+			right := staleBookmarks[j].LastOpened
+			if left == 0 {
+				return true
+			}
+			if right == 0 {
+				return false
+			}
+			return left < right
+		})
+		analytics.StaleBookmarks = staleBookmarks
+	}
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(analytics)
 }

@@ -59,7 +59,11 @@ class ConfigManager {
             layoutPreset: 'default',
             backgroundOpacity: 1,
             fontWeight: 'normal',
-            autoDarkMode: false
+            autoDarkMode: false,
+            showSmartRecentCollection: true,
+            showSmartStaleCollection: true,
+            smartRecentPageIds: [],
+            smartStalePageIds: []
         };
         this.deviceSpecific = false;
 
@@ -111,6 +115,18 @@ class ConfigManager {
             }
             if (typeof this.settingsData.showPageTabs === 'undefined') {
                 this.settingsData.showPageTabs = true;
+            }
+            if (typeof this.settingsData.showSmartRecentCollection === 'undefined') {
+                this.settingsData.showSmartRecentCollection = true;
+            }
+            if (typeof this.settingsData.showSmartStaleCollection === 'undefined') {
+                this.settingsData.showSmartStaleCollection = true;
+            }
+            if (!Array.isArray(this.settingsData.smartRecentPageIds)) {
+                this.settingsData.smartRecentPageIds = [];
+            }
+            if (!Array.isArray(this.settingsData.smartStalePageIds)) {
+                this.settingsData.smartStalePageIds = [];
             }
             this.currentPageId = settings.currentPage || 1;
             
@@ -981,6 +997,14 @@ class ConfigManager {
         document.getElementById('include-finders-in-search-checkbox').checked = this.settingsData.includeFindersInSearch;
         document.getElementById('interleave-mode-checkbox').checked = false;
         document.getElementById('show-page-tabs-checkbox').checked = this.settingsData.showPageTabs;
+        const smartRecentCheckbox = document.getElementById('show-smart-recent-collection-checkbox');
+        if (smartRecentCheckbox) smartRecentCheckbox.checked = this.settingsData.showSmartRecentCollection;
+        const smartStaleCheckbox = document.getElementById('show-smart-stale-collection-checkbox');
+        if (smartStaleCheckbox) smartStaleCheckbox.checked = this.settingsData.showSmartStaleCollection;
+        const smartRecentInput = document.getElementById('smart-recent-pages-input');
+        if (smartRecentInput) smartRecentInput.value = '';
+        const smartStaleInput = document.getElementById('smart-stale-pages-input');
+        if (smartStaleInput) smartStaleInput.value = '';
         document.getElementById('always-collapse-categories-checkbox').checked = this.settingsData.alwaysCollapseCategories;
 
         this.setupDOM();

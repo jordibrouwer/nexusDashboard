@@ -49,6 +49,27 @@ class ConfigSettings {
         return this.legacyThemeMap[themeId] || themeId;
     }
 
+    formatPageIds(ids) {
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return '';
+        }
+        return ids.join(', ');
+    }
+
+    parsePageIds(value) {
+        if (!value || !value.trim()) {
+            return [];
+        }
+        const unique = new Set();
+        value.split(',').forEach((part) => {
+            const parsed = parseInt(part.trim(), 10);
+            if (!Number.isNaN(parsed) && parsed > 0) {
+                unique.add(parsed);
+            }
+        });
+        return Array.from(unique).sort((a, b) => a - b);
+    }
+
     formatThemeLabel(themeId, fallbackName) {
         const baseName = (fallbackName || this.t('config.unnamedTheme')).toString();
         const preview = this.themePreviewLabels[themeId];
@@ -705,6 +726,38 @@ class ConfigSettings {
                 settings.keepSearchOpenWhenEmpty = e.target.checked;
             });
         }
+
+        const showSmartRecentCollectionCheckbox = document.getElementById('show-smart-recent-collection-checkbox');
+        if (showSmartRecentCollectionCheckbox) {
+            showSmartRecentCollectionCheckbox.checked = settings.showSmartRecentCollection !== false;
+            showSmartRecentCollectionCheckbox.addEventListener('change', (e) => {
+                settings.showSmartRecentCollection = e.target.checked;
+            });
+        }
+
+        const showSmartStaleCollectionCheckbox = document.getElementById('show-smart-stale-collection-checkbox');
+        if (showSmartStaleCollectionCheckbox) {
+            showSmartStaleCollectionCheckbox.checked = settings.showSmartStaleCollection !== false;
+            showSmartStaleCollectionCheckbox.addEventListener('change', (e) => {
+                settings.showSmartStaleCollection = e.target.checked;
+            });
+        }
+
+        const smartRecentPagesInput = document.getElementById('smart-recent-pages-input');
+        if (smartRecentPagesInput) {
+            smartRecentPagesInput.value = this.formatPageIds(settings.smartRecentPageIds);
+            smartRecentPagesInput.addEventListener('input', (e) => {
+                settings.smartRecentPageIds = this.parsePageIds(e.target.value);
+            });
+        }
+
+        const smartStalePagesInput = document.getElementById('smart-stale-pages-input');
+        if (smartStalePagesInput) {
+            smartStalePagesInput.value = this.formatPageIds(settings.smartStalePageIds);
+            smartStalePagesInput.addEventListener('input', (e) => {
+                settings.smartStalePageIds = this.parsePageIds(e.target.value);
+            });
+        }
     }
 
     /**
@@ -743,6 +796,10 @@ class ConfigSettings {
         const enableFuzzySuggestionsCheckbox = document.getElementById('enable-fuzzy-suggestions-checkbox');
         const fuzzySuggestionsStartWithCheckbox = document.getElementById('fuzzy-suggestions-start-with-checkbox');
         const keepSearchOpenWhenEmptyCheckbox = document.getElementById('keep-search-open-when-empty-checkbox');
+        const showSmartRecentCollectionCheckbox = document.getElementById('show-smart-recent-collection-checkbox');
+        const showSmartStaleCollectionCheckbox = document.getElementById('show-smart-stale-collection-checkbox');
+        const smartRecentPagesInput = document.getElementById('smart-recent-pages-input');
+        const smartStalePagesInput = document.getElementById('smart-stale-pages-input');
 
         if (themeSelect) settings.theme = themeSelect.value;
         if (columnsInput) settings.columnsPerRow = parseInt(columnsInput.value);
@@ -779,6 +836,10 @@ class ConfigSettings {
         if (enableFuzzySuggestionsCheckbox) settings.enableFuzzySuggestions = enableFuzzySuggestionsCheckbox.checked;
         if (fuzzySuggestionsStartWithCheckbox) settings.fuzzySuggestionsStartWith = fuzzySuggestionsStartWithCheckbox.checked;
         if (keepSearchOpenWhenEmptyCheckbox) settings.keepSearchOpenWhenEmpty = keepSearchOpenWhenEmptyCheckbox.checked;
+        if (showSmartRecentCollectionCheckbox) settings.showSmartRecentCollection = showSmartRecentCollectionCheckbox.checked;
+        if (showSmartStaleCollectionCheckbox) settings.showSmartStaleCollection = showSmartStaleCollectionCheckbox.checked;
+        if (smartRecentPagesInput) settings.smartRecentPageIds = this.parsePageIds(smartRecentPagesInput.value);
+        if (smartStalePagesInput) settings.smartStalePageIds = this.parsePageIds(smartStalePagesInput.value);
         const showIconsCheckbox = document.getElementById('show-icons-checkbox');
         if (showIconsCheckbox) settings.showIcons = showIconsCheckbox.checked;
     }
@@ -1032,7 +1093,11 @@ class ConfigSettings {
             alwaysCollapseCategories: false,
             backgroundOpacity: 1,
             fontWeight: 'normal',
-            autoDarkMode: false
+            autoDarkMode: false,
+            showSmartRecentCollection: true,
+            showSmartStaleCollection: true,
+            smartRecentPageIds: [],
+            smartStalePageIds: []
         };
     }
 

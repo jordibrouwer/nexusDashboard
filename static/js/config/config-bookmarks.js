@@ -76,14 +76,41 @@ class ConfigBookmarks {
             const duplicates = duplicatesRes.ok ? await duplicatesRes.json() : null;
             const duplicateCount = Array.isArray(duplicates?.duplicateUrls) ? duplicates.duplicateUrls.length : 0;
             const duplicateGroups = Array.isArray(duplicates?.duplicateUrls) ? duplicates.duplicateUrls : [];
+            const hasStale = Array.isArray(analytics?.staleBookmarks) && analytics.staleBookmarks.length > 0;
+            const hasDetails = hasStale || duplicateGroups.length > 0;
 
             panel.innerHTML = `
                 <h4>Insights</h4>
                 <div class="duplicate-items">
                     <span class="duplicate-item">Total: ${analytics?.totalBookmarks ?? 0}</span>
                     <span class="duplicate-item">Unused: ${analytics?.unusedCount ?? 0}</span>
+                    <span class="duplicate-item">Stale (30d): ${analytics?.staleCount ?? 0}</span>
                     <span class="duplicate-item">Duplicate URLs: ${duplicateCount}</span>
                 </div>
+                ${hasDetails ? `
+                    <div class="duplicates-actions" style="margin: 0.5rem 0 0.75rem 0;">
+                        <button type="button" class="btn btn-secondary btn-small" id="toggle-insights-details-btn">Show details</button>
+                        ${hasStale ? `
+                        <button type="button" class="btn btn-secondary btn-small" id="move-stale-to-archive-btn">
+                            Move stale bookmarks to Archive
+                        </button>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                <div id="insights-details" style="display: none;">
+                ${hasStale ? `
+                    <div class="duplicates-list">
+                        ${analytics.staleBookmarks.slice(0, 8).map((bookmark) => `
+                            <div class="duplicate-group">
+                                <div class="duplicate-url">${bookmark.name}</div>
+                                <div class="duplicate-items">
+                                    <span class="duplicate-item">${bookmark.url}</span>
+                                    <span class="duplicate-item">Page: ${bookmark.pageId ?? '-'}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
                 ${duplicateGroups.length > 0 ? `
                     <div class="duplicates-list">
                         ${duplicateGroups.map((group) => `
@@ -94,6 +121,7 @@ class ConfigBookmarks {
                         `).join('')}
                     </div>
                 ` : ''}
+                </div>
             `;
 
             panel.querySelectorAll('[data-merge-url]').forEach((button) => {
@@ -102,8 +130,78 @@ class ConfigBookmarks {
                     this.mergeDuplicatesByUrl(url);
                 });
             });
+
+            const toggleDetailsButton = panel.querySelector('#toggle-insights-details-btn');
+            const detailsSection = panel.querySelector('#insights-details');
+            if (toggleDetailsButton && detailsSection) {
+                toggleDetailsButton.addEventListener('click', () => {
+                    const isHidden = detailsSection.style.display === 'none';
+                    detailsSection.style.display = isHidden ? 'block' : 'none';
+                    toggleDetailsButton.textContent = isHidden ? 'Hide details' : 'Show details';
+                });
+            }
+
+            const moveStaleButton = panel.querySelector('#move-stale-to-archive-btn');
+            if (moveStaleButton) {
+                moveStaleButton.addEventListener('click', () => {
+                    this.moveStaleBookmarksToArchive();
+                });
+            }
         } catch (error) {
             panel.innerHTML = '<h4>Insights</h4><div class="duplicate-url">Unable to load insights.</div>';
+        }
+    }
+
+    moveStaleBookmarksToArchive() {
+        if (!window.configManager || !Array.isArray(window.configManager.bookmarksData)) {
+            return;
+        }
+
+        const now = Date.now();
+        const staleThresholdMs = 30 * 24 * 60 * 60 * 1000;
+        const archiveCategoryId = 'archive';
+
+        if (!Array.isArray(window.configManager.categoriesData)) {
+            window.configManager.categoriesData = [];
+        }
+
+        const hasArchive = window.configManager.categoriesData.some((category) => category.id === archiveCategoryId);
+        if (!hasArchive) {
+            window.configManager.categoriesData.push({
+                id: archiveCategoryId,
+                name: 'Archive',
+                icon: '📦'
+            });
+            if (window.configManager.categories && typeof window.configManager.categories.render === 'function') {
+                window.configManager.categories.render(
+                    window.configManager.categoriesData,
+                    window.configManager.generateId.bind(window.configManager)
+                );
+            }
+        }
+
+        let moved = 0;
+        window.configManager.bookmarksData.forEach((bookmark) => {
+            const lastOpened = Number(bookmark.lastOpened || 0);
+            const isStale = lastOpened === 0 || (now - lastOpened) > staleThresholdMs;
+            if (!isStale) {
+                return;
+            }
+            if (bookmark.category !== archiveCategoryId) {
+                bookmark.category = archiveCategoryId;
+                moved += 1;
+            }
+        });
+
+        window.configManager.refreshBookmarksFilterOptions();
+        window.configManager.refreshBookmarksList();
+
+        if (window.configManager.ui) {
+            if (moved > 0) {
+                window.configManager.ui.showNotification(`Moved ${moved} stale bookmark(s) to Archive.`, 'success');
+            } else {
+                window.configManager.ui.showNotification('No stale bookmarks to move in this page.', 'info');
+            }
         }
     }
 
