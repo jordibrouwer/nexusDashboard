@@ -34,10 +34,6 @@
         <div class="container">
             <header class="header">
                 <h1 class="title" data-i18n="config.title">configuration</h1>
-                <div class="nav-links">
-                    <a href="/colors" class="back-link" data-i18n="config.customizeColors">→ customize colors</a>
-                    <a href="/" class="back-link" data-i18n="config.backToDashboard">← back to dashboard</a>
-                </div>
             </header>
         </div>
     </div>
@@ -47,8 +43,14 @@
         <div class="container">
             <div class="config-controls-wrapper">
                 <div class="config-actions-top">
-                    <button id="save-btn" class="btn btn-success" data-i18n="config.saveChanges">Save Changes</button>
-                    <button id="reset-btn" class="btn btn-danger" data-i18n="config.resetToDefaults">Reset to Defaults</button>
+                    <div class="config-actions-buttons">
+                        <button id="save-btn" class="btn btn-success" data-i18n="config.saveChanges">Save Changes</button>
+                        <button id="reset-btn" class="btn btn-danger" data-i18n="config.resetToDefaults">Reset to Defaults</button>
+                    </div>
+                    <div class="nav-links">
+                        <a href="/colors" class="back-link" data-i18n="config.customizeColors">→ customize colors</a>
+                        <a href="/" class="back-link" data-i18n="config.backToDashboard">← back to dashboard</a>
+                    </div>
                 </div>
 
                 <div class="tabs">

@@ -44,6 +44,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    background: var(--background-primary);
+    box-shadow: 0 1px 0 var(--border-primary);
 }
 
 .config-section.section-content {
@@ -60,8 +62,10 @@ body {
 /* Config Actions Top */
 .config-actions-top {
     display: flex;
-    gap: 1rem;
-    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    justify-content: space-between;
+    align-items: center;
     padding: 1rem 0;
     margin-bottom: 0;
     background: var(--background-primary);
@@ -70,7 +74,7 @@ body {
 /* Header */
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
 }
 
@@ -90,6 +94,21 @@ body {
 
 .back-link:hover {
     color: var(--text-primary);
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.25rem;
+    justify-content: flex-end;
+}
+
+.config-actions-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
 }
 
 /* Config Main */
