@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"sort"
 	"strings"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -622,12 +624,18 @@ func (h *Handlers) GetAnalytics(w http.ResponseWriter, r *http.Request) {
 	for _, page := range pages {
 		bookmarks := h.store.GetBookmarksByPage(page.ID)
 		for _, bm := range bookmarks {
+			effectiveOpenCount := bm.OpenCount
+			if effectiveOpenCount <= 0 && bm.LastOpened > 0 {
+				// Backward-compatible usage signal for older data.
+				effectiveOpenCount = 1
+			}
+
 			allBookmarks = append(allBookmarks, BookmarkWithCount{
 				Name:      bm.Name,
 				URL:       bm.URL,
-				OpenCount: bm.OpenCount,
+				OpenCount: effectiveOpenCount,
 			})
-			if bm.OpenCount == 0 {
+			if effectiveOpenCount == 0 {
 				unusedCount++
 			}
 		}
@@ -640,6 +648,9 @@ func (h *Handlers) GetAnalytics(w http.ResponseWriter, r *http.Request) {
 	
 	// Sort for most opened
 	if len(allBookmarks) > 0 {
+		sort.Slice(allBookmarks, func(i, j int) bool {
+			return allBookmarks[i].OpenCount > allBookmarks[j].OpenCount
+		})
 		analytics.MostOpened = allBookmarks
 	}
 	
@@ -756,27 +767,50 @@ func extractDomain(url string) string {
 // Track bookmark opens for analytics
 func (h *Handlers) TrackBookmarkOpen(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
-	var req struct {
-		PageID int `json:"pageId"`
-		Index  int `json:"index"`
-	}
-	
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+
+	var raw map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&raw); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
-	bookmarks := h.store.GetBookmarksByPage(req.PageID)
-	if req.Index < 0 || req.Index >= len(bookmarks) {
+
+	pageID, ok := parseIntFromAny(raw["pageId"])
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	index, ok := parseIntFromAny(raw["index"])
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	bookmarks := h.store.GetBookmarksByPage(pageID)
+	if index < 0 || index >= len(bookmarks) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	
-	bookmarks[req.Index].OpenCount++
-	bookmarks[req.Index].LastOpened = 0 // Current timestamp
-	h.store.SaveBookmarksByPage(req.PageID, bookmarks)
-	
+
+	bookmarks[index].OpenCount++
+	bookmarks[index].LastOpened = time.Now().UnixMilli()
+	h.store.SaveBookmarksByPage(pageID, bookmarks)
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+func parseIntFromAny(value interface{}) (int, bool) {
+	switch v := value.(type) {
+	case float64:
+		return int(v), true
+	case string:
+		parsed, err := strconv.Atoi(v)
+		if err != nil {
+			return 0, false
+		}
+		return parsed, true
+	default:
+		return 0, false
+	}
 }

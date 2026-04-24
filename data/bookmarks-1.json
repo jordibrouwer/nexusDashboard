@@ -7,12 +7,14 @@
     {
       "id": "nieuws",
       "name": "Nieuws",
-      "originalId": "media"
+      "originalId": "media",
+      "icon": "🤓"
     },
     {
       "id": "selfhost",
       "name": "Selfhost",
-      "originalId": "social"
+      "originalId": "social",
+      "icon": "🫣"
     },
     {
       "id": "tools",
@@ -116,7 +118,8 @@
       "shortcut": "LAZYL",
       "category": "selfhost",
       "checkStatus": false,
-      "icon": ""
+      "icon": "",
+      "lastOpened": 1777012864369
     },
     {
       "name": "mediastarr",
@@ -143,7 +146,8 @@
       "shortcut": "NEXTC",
       "category": "selfhost",
       "checkStatus": false,
-      "icon": ""
+      "icon": "",
+      "lastOpened": 1777012812752
     },
     {
       "name": "nginx-pm",
@@ -153,7 +157,7 @@
       "category": "selfhost",
       "checkStatus": false,
       "icon": "",
-      "lastOpened": 1776864068019
+      "lastOpened": 1777012834814
     },
     {
       "name": "p1monitor",
@@ -254,7 +258,8 @@
       "shortcut": "ADGUA",
       "category": "selfhost-2",
       "checkStatus": false,
-      "icon": ""
+      "icon": "",
+      "lastOpened": 1777012874179
     },
     {
       "name": "adguard-2",
@@ -264,7 +269,7 @@
       "category": "selfhost-2",
       "checkStatus": false,
       "icon": "",
-      "lastOpened": 1776864182604
+      "lastOpened": 1777012870603
     },
     {
       "name": "adguardbuddy",

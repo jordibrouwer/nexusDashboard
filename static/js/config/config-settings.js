@@ -8,6 +8,54 @@ class ConfigSettings {
         this.language = language;
         this.t = language.t.bind(language); // Translation function
         this.customThemes = {}; // Store available custom themes (id -> name)
+        this.legacyThemeMap = {
+            aurora: 'aurora-borealis',
+            cyberpunk: 'neon-grid',
+            ember: 'desert-ember',
+            forest: 'forest-moss',
+            lavender: 'lavender-mist',
+            matcha: 'forest-moss',
+            midnight: 'midnight-terminal',
+            mint: 'iceberg',
+            nerd: 'midnight-terminal',
+            ocean: 'iceberg',
+            paper: 'paper-ink',
+            peach: 'desert-ember',
+            sunset: 'sunset-pulse',
+            synthwave: 'neon-grid',
+            void: 'void-mono'
+        };
+        this.themePreviewLabels = {
+            dark: 'Dark',
+            light: 'Light',
+            'aurora-borealis': 'Dark',
+            'blush-daylight': 'Light',
+            'citrus-sky': 'Light',
+            'desert-ember': 'Dark',
+            'forest-moss': 'Dark',
+            iceberg: 'Light',
+            'lavender-mist': 'Light',
+            'midnight-terminal': 'Dark',
+            'neon-grid': 'Neon',
+            'paper-ink': 'Light',
+            'porcelain-blue': 'Light',
+            'sunset-pulse': 'Dark',
+            'void-mono': 'Dark'
+        };
+    }
+
+    normalizeThemeId(themeId) {
+        if (!themeId) return themeId;
+        return this.legacyThemeMap[themeId] || themeId;
+    }
+
+    formatThemeLabel(themeId, fallbackName) {
+        const baseName = (fallbackName || this.t('config.unnamedTheme')).toString();
+        const preview = this.themePreviewLabels[themeId];
+        if (!preview) {
+            return baseName;
+        }
+        return `${baseName} [${preview}]`;
     }
 
     /**
@@ -39,19 +87,25 @@ class ConfigSettings {
 
         const darkOption = document.createElement('option');
         darkOption.value = 'dark';
-        darkOption.textContent = this.t('dashboard.darkTheme');
+        darkOption.textContent = this.formatThemeLabel('dark', this.t('dashboard.darkTheme'));
         themeSelect.appendChild(darkOption);
 
         const lightOption = document.createElement('option');
         lightOption.value = 'light';
-        lightOption.textContent = this.t('dashboard.lightTheme');
+        lightOption.textContent = this.formatThemeLabel('light', this.t('dashboard.lightTheme'));
         themeSelect.appendChild(lightOption);
 
         if (this.customThemes && typeof this.customThemes === 'object') {
-            Object.keys(this.customThemes).forEach(themeId => {
+            const sortedCustomThemes = Object.entries(this.customThemes).sort(([, nameA], [, nameB]) => {
+                const safeNameA = (nameA || this.t('config.unnamedTheme')).toString();
+                const safeNameB = (nameB || this.t('config.unnamedTheme')).toString();
+                return safeNameA.localeCompare(safeNameB, undefined, { sensitivity: 'base' });
+            });
+
+            sortedCustomThemes.forEach(([themeId, themeName]) => {
                 const option = document.createElement('option');
                 option.value = themeId;
-                option.textContent = this.customThemes[themeId] || this.t('config.unnamedTheme');
+                option.textContent = this.formatThemeLabel(themeId, themeName || this.t('config.unnamedTheme'));
                 themeSelect.appendChild(option);
             });
         }
@@ -85,7 +139,10 @@ class ConfigSettings {
         // Theme select
         const themeSelect = document.getElementById('theme-select');
         if (themeSelect) {
-            themeSelect.value = settings.theme;
+            const preferredTheme = this.normalizeThemeId(settings.theme || 'dark');
+            const hasPreferredTheme = Array.from(themeSelect.options).some(option => option.value === preferredTheme);
+            themeSelect.value = hasPreferredTheme ? preferredTheme : 'dark';
+            settings.theme = themeSelect.value;
             themeSelect.addEventListener('change', (e) => {
                 settings.theme = e.target.value;
                 if (callbacks.onThemeChange) callbacks.onThemeChange(settings.theme);
@@ -731,6 +788,8 @@ class ConfigSettings {
      * @param {string} theme
      */
     applyTheme(theme) {
+        const normalizedTheme = this.normalizeThemeId(theme);
+
         // Remove all theme classes
         document.body.classList.remove('dark', 'light');
         
@@ -746,8 +805,8 @@ class ConfigSettings {
         });
         
         // Add the new theme class
-        document.body.classList.add(theme);
-        document.body.setAttribute('data-theme', theme);
+        document.body.classList.add(normalizedTheme);
+        document.body.setAttribute('data-theme', normalizedTheme);
         
         if (window.ThemeLoader) {
             const showBackgroundDots = document.getElementById('show-background-dots-checkbox')?.checked !== false;
@@ -755,7 +814,7 @@ class ConfigSettings {
             const currentClasses = Array.from(document.body.classList);
             const currentFontSizeClass = currentClasses.find(cls => cls.startsWith('font-size-'));
             const currentFontSize = currentFontSizeClass ? currentFontSizeClass.replace('font-size-', '') : 'm';
-            window.ThemeLoader.applyTheme(theme, showBackgroundDots, currentFontSize);
+            window.ThemeLoader.applyTheme(normalizedTheme, showBackgroundDots, currentFontSize);
         }
     }
 

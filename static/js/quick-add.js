@@ -8,6 +8,7 @@ class QuickAddWidget {
         this.dashboard = dashboard;
         this.container = null;
         this.isOpen = false;
+        this.shortcutBound = false;
         this.init();
     }
 
@@ -35,12 +36,13 @@ class QuickAddWidget {
             </div>
         `;
 
-        const mainContainer = document.querySelector('main');
-        if (mainContainer) {
+        // Mount outside #dashboard-layout because that node is rerendered and cleared.
+        const dashboardLayout = document.getElementById('dashboard-layout');
+        if (dashboardLayout && dashboardLayout.parentNode) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             this.container = tempDiv.firstElementChild;
-            mainContainer.insertBefore(this.container, mainContainer.firstChild);
+            dashboardLayout.parentNode.insertBefore(this.container, dashboardLayout);
             this.updateCategories();
         }
     }
@@ -55,15 +57,24 @@ class QuickAddWidget {
         toggleBtn?.addEventListener('click', () => this.toggle());
 
         // Keyboard shortcut: Ctrl+Shift+A to toggle
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') {
-                e.preventDefault();
-                this.toggle();
-            }
-        });
+        if (!this.shortcutBound) {
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') {
+                    e.preventDefault();
+                    this.toggle();
+                }
+            });
+            this.shortcutBound = true;
+        }
     }
 
     toggle() {
+        // Defensive remount in case another render cycle removed the widget.
+        if (!this.container || !document.body.contains(this.container)) {
+            this.createWidget();
+            this.attachEventListeners();
+        }
+
         this.isOpen = !this.isOpen;
         if (this.container) {
             this.container.style.display = this.isOpen ? 'block' : 'none';

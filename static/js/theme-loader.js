@@ -2,6 +2,29 @@
 // This script must be loaded synchronously in the <head> before CSS files
 (function() {
     'use strict';
+
+    const LEGACY_THEME_MAP = {
+        aurora: 'aurora-borealis',
+        cyberpunk: 'neon-grid',
+        ember: 'desert-ember',
+        forest: 'forest-moss',
+        lavender: 'lavender-mist',
+        matcha: 'forest-moss',
+        midnight: 'midnight-terminal',
+        mint: 'iceberg',
+        nerd: 'midnight-terminal',
+        ocean: 'iceberg',
+        paper: 'paper-ink',
+        peach: 'desert-ember',
+        sunset: 'sunset-pulse',
+        synthwave: 'neon-grid',
+        void: 'void-mono'
+    };
+
+    function normalizeTheme(theme) {
+        if (!theme) return 'dark';
+        return LEGACY_THEME_MAP[theme] || theme;
+    }
     
     /**
      * Gets the current theme based on device-specific settings or server default
@@ -15,7 +38,15 @@
             const settings = localStorage.getItem('dashboardSettings');
             if (settings) {
                 try {
-                    theme = JSON.parse(settings).theme || 'dark';
+                    const parsedSettings = JSON.parse(settings);
+                    const normalizedTheme = normalizeTheme(parsedSettings.theme || 'dark');
+                    theme = normalizedTheme;
+
+                    // Persist migrated theme for device-specific users.
+                    if (parsedSettings.theme !== normalizedTheme) {
+                        parsedSettings.theme = normalizedTheme;
+                        localStorage.setItem('dashboardSettings', JSON.stringify(parsedSettings));
+                    }
                 } catch (e) {
                     console.error('Error parsing dashboard settings:', e);
                     theme = 'dark';
@@ -25,11 +56,11 @@
             // Use server-side theme from html element data attribute
             const htmlTheme = document.documentElement.getAttribute('data-theme');
             if (htmlTheme) {
-                theme = htmlTheme;
+                theme = normalizeTheme(htmlTheme);
             }
         }
         
-        return theme;
+        return normalizeTheme(theme);
     }
     
     /**

@@ -1213,6 +1213,7 @@ class Dashboard {
     recordBookmarkOpened(bookmark) {
         if (!bookmark) return;
 
+        bookmark.openCount = Number(bookmark.openCount || 0) + 1;
         bookmark.lastOpened = Date.now();
 
         if (this.pendingMetadataSave) {
