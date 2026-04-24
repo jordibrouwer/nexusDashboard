@@ -193,6 +193,68 @@ body {
     grid-template-columns: repeat(6, 1fr);
 }
 
+/* Layout presets */
+.dashboard-grid.layout-default {
+    gap: 3rem;
+}
+
+.dashboard-grid.layout-compact {
+    gap: 1.5rem;
+}
+
+.dashboard-grid.layout-compact .category {
+    gap: 0.65rem;
+}
+
+.dashboard-grid.layout-compact .bookmarks-list {
+    gap: 0.3rem;
+}
+
+.dashboard-grid.layout-compact .bookmark-link {
+    padding: 0.25rem 0;
+}
+
+.dashboard-grid.layout-cards {
+    gap: 1.5rem;
+}
+
+.dashboard-grid.layout-cards .category {
+    background: color-mix(in srgb, var(--background-primary) 92%, var(--text-secondary) 8%);
+    border: 1px solid var(--border-primary);
+    border-radius: 10px;
+    padding: 0.9rem;
+}
+
+.dashboard-grid.layout-cards .bookmark-link {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 0.45rem 0.55rem;
+}
+
+.dashboard-grid.layout-cards .bookmark-link:hover {
+    border-color: var(--border-primary);
+    transform: translateX(2px);
+}
+
+.dashboard-grid.layout-terminal {
+    gap: 2rem;
+}
+
+.dashboard-grid.layout-terminal .category-title::before {
+    content: '$ ';
+}
+
+.dashboard-grid.layout-terminal .bookmark-link {
+    font-family: "Source Code Pro", monospace;
+    letter-spacing: 0.01em;
+}
+
+.dashboard-grid.layout-terminal .bookmark-link::before {
+    content: '> ';
+    opacity: 0.65;
+    margin-right: 0.35rem;
+}
+
 /* Category */
 .category {
     display: flex;

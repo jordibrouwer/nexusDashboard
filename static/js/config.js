@@ -177,6 +177,11 @@ class ConfigManager {
         this.settings.applyFontSize(this.settingsData.fontSize);
         this.settings.applyBackgroundDots(this.settingsData.showBackgroundDots);
         this.settings.applyAnimations(this.settingsData.animationsEnabled);
+        if (window.LayoutUtils) {
+            this.settingsData.layoutPreset = window.LayoutUtils.applyLayoutPreset(this.settingsData, this.settingsData.layoutPreset || 'default');
+        } else {
+            document.body.setAttribute('data-layout-preset', this.settingsData.layoutPreset || 'default');
+        }
         this.settings.applyBackgroundOpacity(this.settingsData.backgroundOpacity);
         this.settings.applyFontWeight(this.settingsData.fontWeight);
         this.settings.applyAutoDarkMode(this.settingsData.autoDarkMode, this.settingsData);
@@ -201,7 +206,11 @@ class ConfigManager {
                 this.settings.applyAnimations(enabled);
             },
             onLayoutPresetChange: (preset) => {
-                document.body.setAttribute('data-layout-preset', preset || 'default');
+                if (window.LayoutUtils) {
+                    this.settingsData.layoutPreset = window.LayoutUtils.applyLayoutPreset(this.settingsData, preset || 'default');
+                } else {
+                    document.body.setAttribute('data-layout-preset', preset || 'default');
+                }
             },
             onBackgroundOpacityChange: (value) => {
                 this.settings.applyBackgroundOpacity(value);

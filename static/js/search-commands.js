@@ -239,29 +239,43 @@ class SearchCommandsComponent {
             return [];
         }
 
-        const presets = ['default', 'compact', 'cards', 'terminal'];
+        const presets = window.LayoutUtils ? window.LayoutUtils.getLayoutPresets() : ['default', 'compact', 'cards', 'terminal'];
         if (!layout) {
             return presets.map((preset) => ({
                 name: preset,
                 shortcut: ':LAYOUT',
-                completion: `:layout ${preset} `,
-                type: 'command-completion'
+                action: () => this.applyLayoutPreset(dashboard, preset),
+                type: 'command'
             }));
         }
 
-        if (!presets.includes(layout)) {
-            return [];
-        }
+        const matches = presets.filter((preset) => preset.startsWith(layout));
+        if (matches.length === 0) return [];
 
-        dashboard.settings.layoutPreset = layout;
-        if (typeof dashboard.setupDOM === 'function') {
-            dashboard.setupDOM();
-        }
-        if (typeof dashboard.saveSettings === 'function') {
-            dashboard.saveSettings();
-        }
+        return matches.map((preset) => ({
+            name: preset,
+            shortcut: ':LAYOUT',
+            action: () => this.applyLayoutPreset(dashboard, preset),
+            type: 'command'
+        }));
+    }
 
-        return [{ name: `Layout set to ${layout}`, shortcut: ':LAYOUT', action: () => false, type: 'command' }];
+    applyLayoutPreset(dashboard, preset) {
+        if (window.LayoutUtils) {
+            window.LayoutUtils.applyLayoutPreset(dashboard.settings, preset, {
+                syncDashboard: true,
+                saveDashboard: true
+            });
+        } else {
+            dashboard.settings.layoutPreset = preset;
+            if (typeof dashboard.setupDOM === 'function') {
+                dashboard.setupDOM();
+            }
+            if (typeof dashboard.saveSettings === 'function') {
+                dashboard.saveSettings();
+            }
+        }
+        return false;
     }
 
     /**

@@ -231,9 +231,22 @@ class ConfigSettings {
 
         const layoutPresetSelect = document.getElementById('layout-preset-select');
         if (layoutPresetSelect) {
+            if (window.LayoutUtils) {
+                const presets = window.LayoutUtils.getLayoutPresets();
+                layoutPresetSelect.innerHTML = presets.map((preset) => {
+                    const label = preset === 'terminal' ? 'Terminal-ish' : (preset.charAt(0).toUpperCase() + preset.slice(1));
+                    return `<option value="${preset}">${label}</option>`;
+                }).join('');
+                settings.layoutPreset = window.LayoutUtils.normalizeLayoutPreset(settings.layoutPreset || 'default');
+            }
             layoutPresetSelect.value = settings.layoutPreset || 'default';
+            if (callbacks.onLayoutPresetChange) {
+                callbacks.onLayoutPresetChange(layoutPresetSelect.value);
+            }
             layoutPresetSelect.addEventListener('change', (e) => {
-                settings.layoutPreset = e.target.value;
+                settings.layoutPreset = window.LayoutUtils
+                    ? window.LayoutUtils.normalizeLayoutPreset(e.target.value)
+                    : e.target.value;
                 if (callbacks.onLayoutPresetChange) callbacks.onLayoutPresetChange(settings.layoutPreset);
             });
         }
