@@ -913,6 +913,7 @@ class Dashboard {
     syncBookmarksFromDom() {
         const previousBookmarks = this.bookmarks.map((bookmark) => ({ ...bookmark }));
         const nextBookmarks = [];
+        const movedElements = [];
         let bookmarkCursor = 0;
 
         const categoryLists = document.querySelectorAll('.bookmarks-list[data-category-id]');
@@ -930,8 +931,13 @@ class Dashboard {
                 }
 
                 const bookmark = previousBookmarks[oldBookmarkIndex];
+                const movedAcrossCategories = (bookmark.category || '') !== categoryId;
                 nextBookmarks.push({ ...bookmark, category: categoryId });
                 bookmarkElement.setAttribute('data-bookmark-index', String(bookmarkCursor));
+                bookmarkElement.setAttribute('data-category-id', categoryId);
+                if (movedAcrossCategories) {
+                    movedElements.push(bookmarkElement);
+                }
                 bookmarkCursor += 1;
             });
         });
@@ -945,6 +951,10 @@ class Dashboard {
         }
 
         this.bookmarks = nextBookmarks;
+        movedElements.forEach((element) => {
+            element.classList.add('bookmark-move-in');
+            setTimeout(() => element.classList.remove('bookmark-move-in'), 180);
+        });
         this.updateSearchComponent();
         if (this.statusMonitor) {
             this.statusMonitor.updateBookmarks(this.bookmarks);

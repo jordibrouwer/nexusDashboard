@@ -1,0 +1,31 @@
+{
+  "light": {
+    "textPrimary": "#1F2937",
+    "textSecondary": "#6B7280",
+    "textTertiary": "#9CA3AF",
+    "backgroundPrimary": "#F9FAFB",
+    "backgroundSecondary": "#F3F4F6",
+    "backgroundDots": "#E5E7EB",
+    "backgroundModal": "rgba(255, 255, 255, 0.9)",
+    "borderPrimary": "#D1D5DB",
+    "borderSecondary": "#E5E7EB",
+    "accentSuccess": "#059669",
+    "accentWarning": "#D97706",
+    "accentError": "#DC2626"
+  },
+  "dark": {
+    "textPrimary": "#E5E7EB",
+    "textSecondary": "#9CA3AF",
+    "textTertiary": "#6B7280",
+    "backgroundPrimary": "#000",
+    "backgroundSecondary": "#1F2937",
+    "backgroundDots": "#1F2937",
+    "backgroundModal": "rgba(0, 0, 0, 0.8)",
+    "borderPrimary": "#4B5563",
+    "borderSecondary": "#374151",
+    "accentSuccess": "#10B981",
+    "accentWarning": "#F59E0B",
+    "accentError": "#EF4444"
+  },
+  "custom": {}
+}

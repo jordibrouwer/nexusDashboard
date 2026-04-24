@@ -28,7 +28,9 @@ class DragReorder {
         this.onReorder = options.onReorder || null;
         this.itemClass = 'reorder-item';
         this.selected = null;
+        this.dragStartMeta = null;
         this.isTouch = 'ontouchstart' in window;
+        this.placeholder = null;
         
         // Bind handlers
         this.touchStartHandler = (e) => this.touchStart(e);
@@ -43,6 +45,12 @@ class DragReorder {
     init() {
         // Add reorder-container class to container
         this.container.classList.add('reorder-container');
+        if (!window.__dragReorderState) {
+            window.__dragReorderState = { selected: null };
+        }
+        if (!window.__dragReorderState.placeholder) {
+            window.__dragReorderState.placeholder = null;
+        }
         
         // Initialize items
         this.refreshItems();
@@ -84,6 +92,9 @@ class DragReorder {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', '');
         this.selected = e.target.closest(`.${this.itemClass}`);
+        this.dragStartMeta = this.getItemMeta(this.selected);
+        window.__dragReorderState.selected = this.selected;
+        this.removeAllPlaceholders();
         this.selected.classList.remove('is-idle');
         this.selected.classList.add('is-draggable');
         
@@ -96,17 +107,25 @@ class DragReorder {
 
     dragOver(e) {
         e.preventDefault();
+        const activeSelected = this.getSelectedItem();
+        if (!activeSelected) return;
+
         const targetItem = e.target.closest(`.${this.itemClass}`);
-        if (!targetItem || targetItem === this.selected) return;
-        if (this.isBefore(this.selected, targetItem)) {
-            targetItem.parentNode.insertBefore(this.selected, targetItem);
+        if (!targetItem || targetItem === activeSelected) return;
+
+        this.ensurePlaceholder();
+        targetItem.parentNode.insertBefore(this.placeholder, targetItem);
+
+        if (this.isBefore(activeSelected, targetItem)) {
+            targetItem.parentNode.insertBefore(activeSelected, targetItem);
         } else {
-            targetItem.parentNode.insertBefore(this.selected, targetItem.nextSibling);
+            targetItem.parentNode.insertBefore(activeSelected, targetItem.nextSibling);
         }
     }
 
     dragOverContainer(e) {
-        if (!this.selected) return;
+        const activeSelected = this.getSelectedItem();
+        if (!activeSelected) return;
 
         const targetItem = e.target.closest(`.${this.itemClass}`);
         if (targetItem) {
@@ -114,56 +133,101 @@ class DragReorder {
         }
 
         e.preventDefault();
-        if (this.selected.parentNode !== this.container) {
-            this.container.appendChild(this.selected);
+        if (activeSelected.parentNode !== this.container) {
+            this.container.appendChild(activeSelected);
         }
+        this.ensurePlaceholder();
+        this.container.appendChild(this.placeholder);
     }
 
     dragEnd() {
-        this.selected.classList.remove('is-draggable');
-        this.selected.classList.add('is-idle');
+        const activeSelected = this.getSelectedItem();
+        if (!activeSelected) {
+            return;
+        }
+
+        activeSelected.classList.remove('is-draggable');
+        activeSelected.classList.add('is-idle');
+        activeSelected.classList.add('bookmark-move-in');
+        requestAnimationFrame(() => {
+            setTimeout(() => activeSelected.classList.remove('bookmark-move-in'), 180);
+        });
+        this.removeAllPlaceholders();
         this.enablePageScroll();
         document.removeEventListener('dragover', this.preventDrop);
+        const reorderDetails = {
+            from: this.dragStartMeta || this.getItemMeta(activeSelected),
+            to: this.getItemMeta(activeSelected)
+        };
         this.selected = null;
+        window.__dragReorderState.selected = null;
+        this.dragStartMeta = null;
         // Call the onReorder callback with the new order
         if (this.onReorder && typeof this.onReorder === 'function') {
-            this.onReorder(this.getNewOrder());
+            this.onReorder(this.getNewOrder(), reorderDetails);
         }
     }
 
     touchStart(e) {
         e.preventDefault();
         this.selected = e.target.closest(`.${this.itemClass}`);
+        this.dragStartMeta = this.getItemMeta(this.selected);
+        window.__dragReorderState.selected = this.selected;
+        this.removeAllPlaceholders();
         this.selected.classList.remove('is-idle');
         this.selected.classList.add('is-draggable');
         this.disablePageScroll();
     }
     touchMove(e) {
         e.preventDefault();
+        const activeSelected = this.getSelectedItem();
+        if (!activeSelected) return;
         const touch = e.touches[0];
         const pointElement = document.elementFromPoint(touch.clientX, touch.clientY);
         const targetItem = pointElement ? pointElement.closest(`.${this.itemClass}`) : null;
         const targetContainer = pointElement ? pointElement.closest('.bookmarks-list[data-category-id]') : null;
 
-        if (targetItem && targetItem !== this.selected && targetItem.parentNode === this.selected.parentNode) {
-            if (this.isBefore(this.selected, targetItem)) {
-                targetItem.parentNode.insertBefore(this.selected, targetItem);
+        if (targetItem && targetItem !== activeSelected) {
+            this.ensurePlaceholder();
+            targetItem.parentNode.insertBefore(this.placeholder, targetItem);
+            if (this.isBefore(activeSelected, targetItem)) {
+                targetItem.parentNode.insertBefore(activeSelected, targetItem);
             } else {
-                targetItem.parentNode.insertBefore(this.selected, targetItem.nextSibling);
+                targetItem.parentNode.insertBefore(activeSelected, targetItem.nextSibling);
             }
-        } else if (targetContainer && targetContainer !== this.selected.parentNode) {
-            targetContainer.appendChild(this.selected);
+        } else if (targetContainer) {
+            if (targetContainer !== activeSelected.parentNode) {
+                targetContainer.appendChild(activeSelected);
+            }
+            this.ensurePlaceholder();
+            targetContainer.appendChild(this.placeholder);
         }
     }
 
     touchEnd(e) {
-        this.selected.classList.remove('is-draggable');
-        this.selected.classList.add('is-idle');
+        const activeSelected = this.getSelectedItem();
+        if (!activeSelected) {
+            return;
+        }
+
+        activeSelected.classList.remove('is-draggable');
+        activeSelected.classList.add('is-idle');
+        activeSelected.classList.add('bookmark-move-in');
+        requestAnimationFrame(() => {
+            setTimeout(() => activeSelected.classList.remove('bookmark-move-in'), 180);
+        });
+        this.removeAllPlaceholders();
         this.enablePageScroll();
+        const reorderDetails = {
+            from: this.dragStartMeta || this.getItemMeta(activeSelected),
+            to: this.getItemMeta(activeSelected)
+        };
         this.selected = null;
+        window.__dragReorderState.selected = null;
+        this.dragStartMeta = null;
         // Call the onReorder callback with the new order
         if (this.onReorder && typeof this.onReorder === 'function') {
-            this.onReorder(this.getNewOrder());
+            this.onReorder(this.getNewOrder(), reorderDetails);
         }
     }
 
@@ -196,6 +260,29 @@ class DragReorder {
         return Array.from(this.container.children);
     }
 
+    getSelectedItem() {
+        if (this.selected) {
+            return this.selected;
+        }
+        if (window.__dragReorderState && window.__dragReorderState.selected) {
+            return window.__dragReorderState.selected;
+        }
+        return null;
+    }
+
+    getItemMeta(item) {
+        if (!item) {
+            return { categoryId: '', index: -1 };
+        }
+        const parent = item.closest('.bookmarks-list[data-category-id]');
+        const categoryId = parent ? (parent.getAttribute('data-category-id') || '') : '';
+        const siblings = parent ? Array.from(parent.querySelectorAll(`.${this.itemClass}`)) : [];
+        return {
+            categoryId,
+            index: siblings.indexOf(item)
+        };
+    }
+
     getNewOrder() {
         const items = this.getAllItems();
         return items.map((item, index) => ({
@@ -205,9 +292,35 @@ class DragReorder {
         }));
     }
 
+    ensurePlaceholder() {
+        if (!window.__dragReorderState.placeholder) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'bookmark-drop-placeholder';
+            placeholder.setAttribute('aria-hidden', 'true');
+            window.__dragReorderState.placeholder = placeholder;
+        }
+        this.placeholder = window.__dragReorderState.placeholder;
+    }
+
+    removePlaceholder() {
+        const placeholder = window.__dragReorderState ? window.__dragReorderState.placeholder : null;
+        if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.removeChild(placeholder);
+        }
+    }
+
+    removeAllPlaceholders() {
+        document.querySelectorAll('.bookmark-drop-placeholder').forEach((node) => {
+            if (node && node.parentNode) {
+                node.parentNode.removeChild(node);
+            }
+        });
+    }
+
     // Public method to destroy the instance
     destroy() {
         this.enablePageScroll();
+        this.removeAllPlaceholders();
         this.container.classList.remove('reorder-container');
         
         // Remove classes and listeners from items
