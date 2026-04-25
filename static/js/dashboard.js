@@ -811,7 +811,9 @@ class Dashboard {
             }
             const collectionBookmarks = collection.id === '__smart_recent__'
                 ? [...collection.bookmarks].sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
-                : this.sortBookmarks(collection.bookmarks);
+                : collection.id === '__smart_most_used__'
+                    ? [...collection.bookmarks].sort((a, b) => Number(b.openCount || 0) - Number(a.openCount || 0))
+                    : this.sortBookmarks(collection.bookmarks);
             const collectionElement = this.createCategoryElement({
                 id: collection.id,
                 name: collection.name,
